@@ -1,11 +1,15 @@
 {
-  "name": "set-piece",
-  "version": "0.13.0",
+  "name": "demo",
+  "version": "0.1.0",
+  "description": "A TypeScript model framework",
   "private": true,
   "dependencies": {
     "dayjs": "^1.11.10",
     "joi": "^17.13.3",
-    "pixi.js": "^8.1.1"
+    "pixi.js": "^8.1.1",
+    "random": "^5.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
@@ -27,8 +31,6 @@
     "eslint-plugin-react": "^7.33.2",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.3",
     "typescript": "^5.6.2",
@@ -37,9 +39,16 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1"
   },
+  "peerDependencies": {
+    "react": "^18.x.x",
+    "react-dom": "^18.x.x"
+  },
   "scripts": {
     "watch": "webpack -w",
     "build": "webpack --mode production",
-    "serve": "webpack serve"
+    "serve": "webpack serve",
+    "prepublishOnly": "npm run build",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:clean": "rm -rf dist"
   }
 }

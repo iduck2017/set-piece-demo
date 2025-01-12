@@ -1,76 +1,67 @@
-import { ValidateService } from "@/services/validate";
-import { Model } from ".";
-import { DemoModel } from "./demo";
-import { StorageService } from "@/services/storage";
-import { Event } from "@/types/event";
+import { Model, FactoryService, ValidateService, Event } from "set-piece";
+import { DogModel } from "./animal";
+import { GenderType } from "@/utils/types";
 
-@Model.isRoot()
-export class RootModel extends Model<{}, {
+@Model.asRoot()
+export class RootModel extends Model<{
+    count: number
+}, {
     onStart: Event<{ target: RootModel }>
     onQuit: Event<{ target: RootModel }>
 }, {
-    demo?: DemoModel
+    dog?: DogModel,
 }> {
-    private static _singleton: Map<Function, any | undefined> = new Map();
-    static isSingleton<T extends new (...args: any[]) => Model>() {
-        return function (constructor: T) {
-            RootModel._singleton.set(constructor, undefined);
-            return class extends constructor {
-                constructor(...args: any[]) {
-                    super(...args);
-                    if (RootModel._singleton.has(constructor)) {
-                        console.warn('Singleton already exists: ', this.name);
-                        return RootModel._singleton.get(constructor);
-                    }
-                    RootModel._singleton.set(constructor, this);
-                }
-            };
-        };
-    }
-
     constructor(props: RootModel['props']) {
         super({
             ...props,
             child: {},
-            state: {},
+            state: {
+                count: props.state?.count ?? 0,
+            },
         });
     }
 
-    @ValidateService.useValidator(model => !model.child.demo)
-    startGame() {
+    countup() {
+        this.stateDraft.count++;
+        return undefined;
+    }
+
+    @ValidateService.useCheck(model => !model.child.dog)
+    spawnDog() {
         const chunk = localStorage.getItem('demo');
-        let demo: DemoModel | undefined = undefined;
+        let dog: DogModel | undefined = undefined;
         if (chunk) {
             try { 
                 const chunkJSON = JSON.parse(chunk);
-                console.log('💾', 'Load chunk data:', chunkJSON);
-                demo = StorageService.deserialize(chunkJSON); 
-                console.log('💾', 'Load model:', demo?.name, demo);
-            } catch (error) {
-                console.warn('💾', 'Load chunk error:', error);
-            }
+                dog = FactoryService.deserialize(chunkJSON); 
+            } catch (error) {}
         }
-        if (!demo) demo = new DemoModel({});
-        this.childProxy.demo = demo
+        if (!dog) dog = new DogModel({
+            state: {
+                gender: GenderType.FEMALE
+            },
+        });
+        this.childDraft.dog = dog
         this.emitEvent(this.event.onStart, { target: this });
         return undefined;
     }
 
-    @ValidateService.useValidator(model => model.child.demo)
-    quitGame() {
-        const demo = this.child.demo;
-        delete this.childProxy.demo;
+    @ValidateService.useCheck(model => model.child.dog)
+    removeDog() {
+        delete this.childDraft.dog;
         this.emitEvent(this.event.onQuit, { target: this });
-        return demo;
+        return undefined;
     }
 
-    @ValidateService.useValidator(model => model.child.demo)
-    save() {
-        if (!this.child.demo) return;
-        const chunk = StorageService.serialize(this.child.demo);
+    @ValidateService.useCheck(model => model.child.dog)
+    saveDog() {
+        if (!this.child.dog) return;
+        const chunk = FactoryService.serialize(this.child.dog);
         if (!chunk) return;
-        console.log('💾', 'Save chunk:', chunk);
         localStorage.setItem('demo', JSON.stringify(chunk));
         return chunk;
     }
+
+
+
 }

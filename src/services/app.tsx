@@ -1,15 +1,11 @@
 import React from "react";
 import { RootView } from "@/debug/root";
-import { Model } from "../models";
-import { ValidateService } from "./validate";
-import { DemoModel } from "@/models/demo";
 import { createRoot } from "react-dom/client";
 import { RootModel } from "@/models/root";
 
 export class AppService {
     private static _rootView?: HTMLElement;
     private static _rootModel?: RootModel;
-    public static get rootModel() { return this._rootModel; }
 
     private constructor() {}
 
@@ -20,6 +16,7 @@ export class AppService {
 
         // Model initialize
         this._rootModel = new RootModel({});
+        console.log(this._rootModel);
 
         // View initialize
         AppService._rootView = document.getElementById("root") ?? undefined;

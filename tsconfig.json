@@ -3,6 +3,7 @@
       "outDir": "./dist/",
       "noImplicitAny": true,
       "module": "ESNext",
+      "lib": ["ES2018", "DOM"],
       "target": "ESNext",
       "jsx": "react",
       "allowJs": true,
@@ -14,6 +15,7 @@
       "paths": {
         "@/*": ["./src/*"],
       },
+      "baseUrl": "."
     },
     "include": [
       "src/**/*"

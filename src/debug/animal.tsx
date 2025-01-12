@@ -1,8 +1,6 @@
 import React from "react";
-import { AnimalModel } from "@/models/animal";
-import { View } from ".";
-import { Link } from "./common";
-import { useModel } from "./use-model";
+import { AnimalModel, DogModel } from "@/models/animal";
+import { View, Link, useModel } from "set-piece";
 import { BreedModel } from "@/models/features";
 
 export function AnimalView(props: {
@@ -15,6 +13,7 @@ export function AnimalView(props: {
         state={
             <>
                 <Link model={props.model} action="growup" />
+                {props.model instanceof DogModel && <DogState model={props.model} />}
             </>
         }
         child={
@@ -25,6 +24,14 @@ export function AnimalView(props: {
             </>
         }
     />
+}
+
+export function DogState(props: {
+    model?: DogModel
+}) {
+    return <>
+        <Link model={props.model} action="playGame" />
+    </>
 }
 
 
@@ -38,13 +45,17 @@ export function BreedView(props: {
         state={
             <>
                 <Link model={props.model} action="spawnChild" />
+                <Link model={props.model} action="cloneChild" />
+                <Link model={props.model} action="destroyChild" />
             </>
         }
         child={
-            child?.map(animal => <AnimalView 
-                model={animal} 
-                key={animal.uuid} 
-            />)
+            child?.map(animal => (
+                <AnimalView 
+                    model={animal} 
+                    key={animal.uuid} 
+                />  
+            ))
         }
     />
 }

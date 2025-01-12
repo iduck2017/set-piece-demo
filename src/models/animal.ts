@@ -1,9 +1,10 @@
-import { Event } from "@/types/event";
-import { Model } from ".";
+import { Model, Event, FactoryService, ValidateService, SyncService, Value } from "set-piece";
 import { FlyModel, BreedModel, SwimModel } from "./features";
-import { Value } from "@/types/base";
-import { ValidateService } from "@/services/validate";
-import { StorageService } from "@/services/storage";
+import { EmotionType, GenderType } from "@/utils/types";    
+
+type BornEvent = Event<{ target: AnimalModel }>
+type GrowEvent = Event<{ target: AnimalModel, agePrev: number }>
+export type DieEvent<T extends AnimalModel = AnimalModel> = Event<{ target: T }>
 
 export class AnimalModel<
     T extends AnimalModel = any,
@@ -14,12 +15,13 @@ export class AnimalModel<
     S & { 
         isAlive: boolean 
         ageLimit: number
-        age: number
+        age: number,
+        gender: GenderType
     },
     E & {
-        onBorn: Event<{ target: AnimalModel }>
-        onDie: Event<{ target: AnimalModel }>
-        onGrow: Event<{ target: AnimalModel, agePrev: number }>
+        onBorn: BornEvent
+        onDie: DieEvent
+        onGrow: GrowEvent
     },
     C & {
         fly: FlyModel,
@@ -27,14 +29,25 @@ export class AnimalModel<
         breed: BreedModel<T>
     }
 > {
+    get refer(): {
+        mother?: AnimalModel,
+    } {
+        return {
+            mother: this.queryParent(AnimalModel)
+        }
+    }
+
+
     static superProps<M extends AnimalModel>(
         props: M['props']
     ) {
+        const gender = SyncService.random.int(GenderType.MALE, GenderType.UNKNOWN)
         return {
             ...props,
             state: {
                 isAlive: props.state?.isAlive ?? true,
                 age: props.state?.age ?? 0,
+                gender: props.state?.gender ?? gender
             },
             child: {
                 swim: props.child?.swim ?? new SwimModel({}),
@@ -44,17 +57,14 @@ export class AnimalModel<
         }
     }
 
-    protected static isAlive() {
-        return ValidateService.useValidator<AnimalModel>(
-            (target) => target.state.isAlive
-        )
-    }
+    isAlive() { return this.state.isAlive }
+    isFemale() { return this.state.gender === GenderType.FEMALE }
 
 
-    @AnimalModel.isAlive()
+    @ValidateService.useCheck(model => model.isAlive())
     growup() {
         const agePrev = this.state.age;
-        this.stateProxy.age++;
+        this.stateDraft.age++;
         this.emitEvent(
             this.event.onGrow,
             {
@@ -62,8 +72,15 @@ export class AnimalModel<
                 agePrev
             }
         )
+        if (this.state.age >= this.state.ageLimit) {
+            this.die();
+        }
     }
 
+    die() {
+        this.stateDraft.isAlive = false;
+        this.emitEvent(this.event.onDie, { target: this });
+    }
 }
 
 
@@ -75,9 +92,12 @@ export class PetModel<
 > extends AnimalModel<
     T,
     S & {
-        price: number
+        name: string,
+        price: number,
+        isSelled: boolean,
     },
     E & {
+        onDie: DieEvent<PetModel>
         onSell: Event<{ target: PetModel }>
     },
     C
@@ -90,45 +110,44 @@ export class PetModel<
             ...superProps,
             state: {
                 ...superProps.state,
+                isSelled: props.state?.isSelled ?? false
             },
         }
     }
+ 
+    debug() {
+        super.debug();
+        const a: number = this.state.price;
+        const b: string = this.state.name;
+        const c: SwimModel = this.child.swim;
+    }
 }
 
-@StorageService.useProduct('duck')
-export class DuckModel extends PetModel<
-    DuckModel,
+type PlayEvent = Event<{ target: DogModel }>
+type FeedEvent = Event<{ target: DogModel }>
+
+@FactoryService.useProduct('dog')
+export class DogModel extends PetModel<
+    DogModel,
     {
-        eggs: number
+        emotion: EmotionType;
+    },
+    {
+        onDie: DieEvent<DogModel>
+        onPlay: PlayEvent;
+        onFeed: FeedEvent;
+        onChildPlay: PlayEvent;
     }
 > {
-    constructor(props: DuckModel['props']) {
-        const superProps = DuckModel.superProps(props);
-        super({
-            ...superProps,
-            state: {
-                ...superProps.state,
-                price: props.state?.price ?? 1000,
-                ageLimit: props.state?.ageLimit ?? 10,
-                eggs: props.state?.eggs ?? 0,
-            }
-        });
+    get refer(): {
+        mother?: DogModel,
+    } {
+        return {
+            ...super.refer,
+            mother: this.queryParent(DogModel)
+        }
     }
 
-    @ValidateService.useValidator(model => model.state.isAlive)
-    quack(): number | undefined {
-        console.log('quack');
-        return 1;
-    }
-
-    debug() {
-        const a = this.quack()
-        console.log(this.quack())
-    }
-}
-
-@StorageService.useProduct('dog')
-export class DogModel extends PetModel {
     constructor(props: DogModel['props']) {
         const superProps = DogModel.superProps(props);
         super({
@@ -137,7 +156,40 @@ export class DogModel extends PetModel {
                 ...superProps.state,
                 price: props.state?.price ?? 5000,
                 ageLimit: props.state?.ageLimit ?? 20,
+                name: props.state?.name ?? 'Bob',
+                emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
             }
         });
     }
+
+    @Model.onInit()
+    private _useSiblingPlay() {
+        const mother = this.refer.mother;
+        if (mother) {
+            this.bindEvent(mother.event.onChildPlay, (event) => {
+                this.stateDraft.emotion = EmotionType.HAPPY;
+            })
+        }
+    }
+
+    @Model.onChildInit()
+    private _useChildPlay(child: Model) {
+        if (!(child instanceof DogModel)) return;
+        if (child.refer.mother === this) {
+            this.bindEvent(child.event.onPlay, (event) => {
+                this.emitEvent(this.event.onChildPlay, event);
+            })
+        }
+    }
+
+
+    @ValidateService.useCheck(model => model.isAlive())
+    playGame() {
+        this.stateDraft.emotion = EmotionType.HAPPY;
+        this.emitEvent(this.event.onPlay, {
+            target: this
+        });
+    }
+
+    
 }

@@ -4,27 +4,8 @@ const fs = require('fs');
 const HtmlWebpackPlugin=require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-function getFileName(dirname) {
-    const pathname = path.resolve(__dirname, dirname)
-    const filenameList = fs.readdirSync(pathname);
-    const result = [];
-    filenameList.forEach(filename => {
-        const filePath = `${dirname}/${filename}`;
-        const stat = fs.statSync(filePath);
-        if (stat.isFile()) {
-            result.push(filePath);
-        } else if (stat.isDirectory()) {
-            result.push(...getFileName(filePath));
-        }
-    });
-    return result;
-}
-
 module.exports = {
-    entry: [
-        ...getFileName(path.resolve(__dirname, './src/models')),
-        path.resolve(__dirname, './src/index.ts'),
-    ],
+    entry: './src/index.ts',
     mode: "development",
     output: {
         filename: 'bundle.[hash:4].js',
@@ -38,6 +19,8 @@ module.exports = {
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+            react: path.resolve('./node_modules/react'),
+            'react-dom': path.resolve('./node_modules/react-dom'),
         },
         extensions: ['.js', '.json', '.ts', '.tsx'],
     },

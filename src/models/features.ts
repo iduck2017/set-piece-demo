@@ -1,29 +1,18 @@
-import { Event } from "@/types/event";
-import { Model, ModelStatus } from ".";
-import { AnimalModel } from "./animal";
-import { Value } from "@/types/base";
-import { ValidateService } from "@/services/validate";
+import { Model, Event, FactoryService, ValidateService, Value } from "set-piece";
+import { AnimalModel, DieEvent } from "./animal";
 import { RootModel } from "./root";
-import { StorageService } from "@/services/storage";
-
-export enum GenderType {
-    MALE = 'male',
-    FEMALE = 'female',
-    UNKNOWN = 'unknown',
-}
 
 export class FeatureModel<
     S extends Record<string, Value> = Record<string, Value>,
     E extends Record<string, Event> = Record<string, Event>,
     C extends Record<string, Model> | Model[] = any,
 > extends Model<S, E, C> {
-    get parentRefer(): {
+    get refer(): {
         root?: RootModel,
         animal?: AnimalModel,
     } {
-        const result = super.parentRefer;
         return {
-            ...result,
+            root: this.queryParent(RootModel),
             animal: this.queryParent(AnimalModel)
         }
     }
@@ -33,7 +22,7 @@ export class FeatureModel<
     }
 }
 
-@StorageService.useProduct('fly')
+@FactoryService.useProduct('fly')
 export class FlyModel extends FeatureModel<
     { 
         isEnable: boolean,
@@ -64,7 +53,7 @@ export class FlyModel extends FeatureModel<
         if (!speed) speed = 1;
         if (!this.state.isEnable) return;
         if (!this.state.isFlying) return;
-        this.stateProxy.speed = Math.min(
+        this.stateDraft.speed = Math.min(
             this.state.speed + speed, 
             this.state.speedLimit
         );
@@ -72,7 +61,7 @@ export class FlyModel extends FeatureModel<
 
 }
 
-@StorageService.useProduct('swim')
+@FactoryService.useProduct('swim')
 export class SwimModel extends FeatureModel<
     { 
         isEnable: boolean,
@@ -81,6 +70,7 @@ export class SwimModel extends FeatureModel<
         speed: number
     },
     {
+        onDie: DieEvent
         onSwim: Event<{ target: SwimModel }>
         onLand: Event<{ target: SwimModel }>
         onDive: Event<{ target: SwimModel }>
@@ -104,60 +94,97 @@ export class SwimModel extends FeatureModel<
         if (!speed) speed = 1;
         if (!this.state.isEnable) return;
         if (!this.state.isSwimming) return;
-        this.stateProxy.speed = Math.min(
+        this.stateDraft.speed = Math.min(
             this.state.speed + speed, 
             this.state.speedLimit
         );
     }
 }
 
-@StorageService.useProduct('reproduce')
+type SpawnEvent = Event<{ target: BreedModel, child: AnimalModel }>
+type CloneEvent = Event<{ target: BreedModel, child: AnimalModel }>
+
+@FactoryService.useProduct('reproduce')
 export class BreedModel<
     T extends AnimalModel = AnimalModel
 > extends FeatureModel<
     {
-        gender: GenderType
         isEnable: boolean
     },
     {
-        onReproduce: Event<{ target: BreedModel, child: T }>
+        onSpawn: SpawnEvent
+        onClone: CloneEvent
     },
     T[]
 > {
-    constructor(props: BreedModel['props']) {
+    constructor(props: BreedModel<T>['props']) {
         super({
             ...props,
             state: {
-                gender: props.state?.gender ?? GenderType.UNKNOWN,
                 isEnable: props.state?.isEnable ?? false,
             },
-            child: [],
+            child: props.child ?? [],
         });
     }
 
-    @ValidateService.useValidator(target => target.parentRefer.animal?.state.isAlive, undefined)
-    @ValidateService.useValidator(target => target.state.gender === GenderType.FEMALE,  undefined)
-    spawnChild(target?: T): T | undefined {
+    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
+    @ValidateService.useCheck(model => model.refer.animal?.isFemale())
+    spawnChild(props?: T['props']): T | undefined {
 
-        const parent = this.parentRefer.animal;
-        if (!parent) return undefined;
+        const animal = this.refer.animal;
+        if (!animal) return undefined;
 
-        const Type: any = parent.constructor;
-        target = target ?? new Type({});
-        if (!target) return;
+        const constructor: any = animal.constructor;
+        const child = new constructor(props ?? {});
 
-        const uuid = target.uuid;
-        this.childProxy.push(target);
+        this.childDraft.push(child);
+        this.emitEvent(this.event.onSpawn, {
+            target: this,
+            child
+        });
 
-        console.log('spawnChild', this.queryChild(uuid));
+        return child;
+    }
 
-        this.emitEvent(
-            this.event.onReproduce,
-            {
-                target: this,
-                child: target
-            }
+    @ValidateService.useCheck(model => model.child.length)
+    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
+    cloneChild(index?: number): T | undefined {
+        const child = this.child[index ?? 0];
+
+        this.childDraft.push(child);
+        this.emitEvent(this.event.onClone, {
+            target: this,
+            child
+        });
+
+        return child;
+    }
+
+    @ValidateService.useCheck(model => model.child.length)
+    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
+    destroyChild(index?: number) {
+        const child = this.child[index ?? 0];
+        if (!child) return;
+        const result = this.removeChild(child);
+        console.log('Destroyed child', result);
+        result?.debug();
+        return result;
+    }
+
+    @Model.onChildInit()
+    private _useChildDie(child: Model) {
+        if (!(child instanceof AnimalModel)) return;
+        if (child.parent !== this) return;
+        this.bindEvent(
+            child.event.onDie,
+            this._disposeChild
         )
+    }
+
+    @Model.useAutomic()
+    private _disposeChild(event: DieEvent) {
+        this.removeChild(event.target);
+        event.target.debug();
     }
 
 }
