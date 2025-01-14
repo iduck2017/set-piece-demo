@@ -1,3 +1,12 @@
 
-export enum GenderType { MALE, FEMALE, UNKNOWN }
-export enum EmotionType { SAD, HAPPY, ANGRY, NEUTRAL }
+export enum GenderType { 
+    MALE = 'male', 
+    FEMALE = 'female', 
+    UNKNOWN = 'unknown', 
+    SUPER_MALE = 'super-male', 
+}
+export enum EmotionType { 
+    HAPPY = 'happy', 
+    ANGRY = 'angry', 
+    NEUTRAL = 'neutral' 
+}

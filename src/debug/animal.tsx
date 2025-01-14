@@ -1,26 +1,28 @@
 import React from "react";
 import { AnimalModel, DogModel } from "@/models/animal";
 import { View, Link, useModel } from "set-piece";
-import { BreedModel } from "@/models/features";
+import { SwimView, BreedView } from "./feature";
 
 export function AnimalView(props: {
     model?: AnimalModel
 }) {
-    const { state, child } = useModel(props.model);
+    const { child } = useModel(props.model);
     
     return <View 
         model={props.model} 
         state={
             <>
                 <Link model={props.model} action="growup" />
+                <Link model={props.model} action="resetState" />
                 {props.model instanceof DogModel && <DogState model={props.model} />}
             </>
         }
         child={
             <>
+                <SwimView model={child?.swim} />
                 <BreedView model={child?.breed} />
+                <View model={child?.superMale} isFold />
                 <View model={child?.fly} isFold />
-                <View model={child?.swim} isFold />
             </>
         }
     />
@@ -32,30 +34,4 @@ export function DogState(props: {
     return <>
         <Link model={props.model} action="playGame" />
     </>
-}
-
-
-export function BreedView(props: {
-    model?: BreedModel
-}) {
-    const { child } = useModel(props.model);
-
-    return <View 
-        model={props.model} 
-        state={
-            <>
-                <Link model={props.model} action="spawnChild" />
-                <Link model={props.model} action="cloneChild" />
-                <Link model={props.model} action="destroyChild" />
-            </>
-        }
-        child={
-            child?.map(animal => (
-                <AnimalView 
-                    model={animal} 
-                    key={animal.uuid} 
-                />  
-            ))
-        }
-    />
 }

@@ -16,7 +16,6 @@ export class AppService {
 
         // Model initialize
         this._rootModel = new RootModel({});
-        console.log(this._rootModel);
 
         // View initialize
         AppService._rootView = document.getElementById("root") ?? undefined;

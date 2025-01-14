@@ -9,17 +9,18 @@ export function RootView(props: {
     const { child } = useModel(props.model);
     
     useEffect(() => {
-        props.model.spawnDog();
+        props.model.startGame();
     }, [])
 
     return <View 
         model={props.model}
         state={
             <>
-                <Link model={props.model} action="spawnDog" />
-                <Link model={props.model} action="removeDog" />
-                <Link model={props.model} action="saveDog" />
+                <Link model={props.model} action="startGame" />
+                <Link model={props.model} action="quitGame" />
+                <Link model={props.model} action="save" />
                 <Link model={props.model} action="countup" />
+                <div className="link">aaa</div>
             </>
         }
         child={

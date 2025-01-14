@@ -1,32 +1,46 @@
-import { Model, Event, FactoryService, ValidateService, Value } from "set-piece";
-import { AnimalModel, DieEvent } from "./animal";
+import { Model, Event, FactoryService, ValidateService, Value, SyncService } from "set-piece";
+import { AnimalModel, DieEvent, DogModel } from "./animal";
 import { RootModel } from "./root";
+import { EmotionType, GenderType } from "@/utils/types";
 
 export class FeatureModel<
-    S extends Record<string, Value> = Record<string, Value>,
-    E extends Record<string, Event> = Record<string, Event>,
+    S extends Record<string, Value> = {},
+    E extends Record<string, Event> = {},
     C extends Record<string, Model> | Model[] = any,
-> extends Model<S, E, C> {
-    get refer(): {
-        root?: RootModel,
-        animal?: AnimalModel,
-    } {
+> extends Model<
+    S & { isEnabled: boolean }, 
+    E, 
+    C, 
+    AnimalModel
+> {
+    protected static superProps<T extends FeatureModel>(props: T['props']) {
         return {
-            root: this.queryParent(RootModel),
-            animal: this.queryParent(AnimalModel)
+            ...props,
+            state: {
+                isEnabled: props.state?.isEnabled ?? false,
+            }
         }
     }
 
-    debug(): void {
-        super.debug();
+    get state() {
+        return {
+            ...super.state,
+            isAlive: this.parent?.state.isAlive ?? false,
+            isFemale: this.parent?.state.gender === GenderType.FEMALE,
+        }
+    }
+
+    get root(): RootModel | undefined {
+        return this.queryParent(RootModel);
     }
 }
 
 @FactoryService.useProduct('fly')
 export class FlyModel extends FeatureModel<
     { 
-        isEnable: boolean,
         isFlying: boolean,
+        heightLimit: number,
+        height: number,
         speedLimit: number
         speed: number
     },
@@ -37,34 +51,68 @@ export class FlyModel extends FeatureModel<
     {}
 > {
     constructor(props: FlyModel['props']) {
+        const superProps = FeatureModel.superProps(props);
         super({
-            ...props,
+            ...superProps,
             state: {
-                isEnable: props.state?.isEnable ?? false,
+                ...superProps.state,
                 isFlying: props.state?.isFlying ?? false,
                 speedLimit: props.state?.speedLimit ?? 1,
                 speed: props.state?.speed ?? 1,
+                heightLimit: props.state?.heightLimit ?? 1,
+                height: props.state?.height ?? 1,
             },
             child: {},
         });
     }
 
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    @ValidateService.useCheck(model => model.state.isFlying)
+    ascend(height?: number) {
+        if (!height) height = 1;
+        this.stateProxy.height = Math.min(
+            this.state.height + height, 
+            this.state.heightLimit
+        );
+    }
+
+    @ValidateService.useCheck(model => model.state.isFlying)
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
     accelerate(speed?: number) {
         if (!speed) speed = 1;
-        if (!this.state.isEnable) return;
-        if (!this.state.isFlying) return;
-        this.stateDraft.speed = Math.min(
+        this.stateProxy.speed = Math.min(
             this.state.speed + speed, 
             this.state.speedLimit
         );
     }
 
+
+    @ValidateService.useCheck(model => !model.state.isFlying)
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    fly() {
+        this.stateProxy.isFlying = true;
+        this.emitEvent(this.event.onFly, {
+            target: this,
+        });
+    }
+
+    @ValidateService.useCheck(model => model.state.isFlying)
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    land() {
+        this.stateProxy.isFlying = false;
+        this.emitEvent(this.event.onLand, {
+            target: this,
+        });
+    }
 }
 
 @FactoryService.useProduct('swim')
 export class SwimModel extends FeatureModel<
     { 
-        isEnable: boolean,
         isSwimming: boolean,
         speedLimit: number,
         speed: number
@@ -77,29 +125,85 @@ export class SwimModel extends FeatureModel<
     },
     {}
 > {
+    private static _rules: Map<Function, {
+        isEnabled: boolean,
+        speedLimit: number,
+    }> = new Map();
+    
+    static useFeature(rule: {
+        isEnabled: boolean,
+        speedLimit: number,
+    }) {
+        return function (constructor: new (...args: any[]) => Model) {
+            SwimModel._rules.set(constructor, rule);
+        };
+    }
+
+
     constructor(props: SwimModel['props']) {
+        const superProps = FeatureModel.superProps(props);
         super({
-            ...props,
+            ...superProps,
             state: {
-                isEnable: props.state?.isEnable ?? false,
+                ...superProps.state,
                 isSwimming: props.state?.isSwimming ?? false,
-                speedLimit: props.state?.speedLimit ?? 0,
-                speed: props.state?.speed ?? 0,
+                speedLimit: props.state?.speedLimit ?? 1,
+                speed: props.state?.speed ?? 1,
             },
             child: {},
         });
     }
 
+    @Model.onInit()
+    @Model.useAutomic()
+    private _useRule() {
+        if (!this.parent) return;
+        let constructor: any = this.parent.constructor;
+        while (constructor) {
+            const rule = SwimModel._rules.get(constructor);
+            if (rule) {
+                this.stateProxy.speedLimit = rule.speedLimit;
+                this.stateProxy.isEnabled = rule.isEnabled;
+                return;
+            }
+            constructor = constructor.__proto__;
+        }
+    }
+
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    @ValidateService.useCheck(model => model.state.isSwimming)
     accelerate(speed?: number) {
         if (!speed) speed = 1;
-        if (!this.state.isEnable) return;
-        if (!this.state.isSwimming) return;
-        this.stateDraft.speed = Math.min(
+        this.stateProxy.speed = Math.min(
             this.state.speed + speed, 
             this.state.speedLimit
         );
     }
+
+    @ValidateService.useCheck(model => !model.state.isSwimming)
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    swim() {
+        this.stateProxy.isSwimming = true;
+        this.emitEvent(this.event.onSwim, {
+            target: this,
+        });
+    }
+
+    @ValidateService.useCheck(model => model.state.isSwimming)
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    land() {
+        this.stateProxy.isSwimming = false;
+        this.emitEvent(this.event.onDive, {
+            target: this,
+        });
+    }
 }
+
+
+
 
 type SpawnEvent = Event<{ target: BreedModel, child: AnimalModel }>
 type CloneEvent = Event<{ target: BreedModel, child: AnimalModel }>
@@ -108,9 +212,7 @@ type CloneEvent = Event<{ target: BreedModel, child: AnimalModel }>
 export class BreedModel<
     T extends AnimalModel = AnimalModel
 > extends FeatureModel<
-    {
-        isEnable: boolean
-    },
+    {},
     {
         onSpawn: SpawnEvent
         onClone: CloneEvent
@@ -118,26 +220,42 @@ export class BreedModel<
     T[]
 > {
     constructor(props: BreedModel<T>['props']) {
+        const superProps = FeatureModel.superProps(props);
         super({
-            ...props,
-            state: {
-                isEnable: props.state?.isEnable ?? false,
-            },
+            ...superProps,
             child: props.child ?? [],
+            state: {
+                ...superProps.state,
+                isEnabled: true,
+            }
         });
     }
 
-    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
-    @ValidateService.useCheck(model => model.refer.animal?.isFemale())
+    @ValidateService.useCheck(model => model.state.isEnabled)
+    @ValidateService.useCheck(model => model.state.isAlive)
+    @ValidateService.useCheck(model => model.state.isFemale)
     spawnChild(props?: T['props']): T | undefined {
+        const parent = this.parent;
+        if (!parent) return undefined;
+        
+        if (!props) props = {}
+        
+        const isAbnormal = SyncService.random.float(0, 1) > 0;
+        if (isAbnormal) {
+            props = {
+                ...props,
+                child: {
+                    ...props.child,
+                    superMale: new SuperMaleModel({}),
+                }
+            }
+        }
 
-        const animal = this.refer.animal;
-        if (!animal) return undefined;
+        const constructor: any = parent.constructor;
+        const child = new constructor(props);
 
-        const constructor: any = animal.constructor;
-        const child = new constructor(props ?? {});
 
-        this.childDraft.push(child);
+        this.childProxy.push(child);
         this.emitEvent(this.event.onSpawn, {
             target: this,
             child
@@ -146,12 +264,13 @@ export class BreedModel<
         return child;
     }
 
+    @ValidateService.useCheck(model => model.state.isEnabled)
     @ValidateService.useCheck(model => model.child.length)
-    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
+    @ValidateService.useCheck(model => model.state.isAlive)
     cloneChild(index?: number): T | undefined {
         const child = this.child[index ?? 0];
 
-        this.childDraft.push(child);
+        this.childProxy.push(child);
         this.emitEvent(this.event.onClone, {
             target: this,
             child
@@ -161,12 +280,12 @@ export class BreedModel<
     }
 
     @ValidateService.useCheck(model => model.child.length)
-    @ValidateService.useCheck(model => model.refer.animal?.isAlive())
+    @ValidateService.useCheck(model => model.state.isAlive)
+    @ValidateService.useCheck(model => model.state.isFemale)
     destroyChild(index?: number) {
         const child = this.child[index ?? 0];
         if (!child) return;
         const result = this.removeChild(child);
-        console.log('Destroyed child', result);
         result?.debug();
         return result;
     }
@@ -187,4 +306,30 @@ export class BreedModel<
         event.target.debug();
     }
 
+}
+
+@FactoryService.useProduct('super-male')
+export class SuperMaleModel extends FeatureModel {
+    constructor(props: SuperMaleModel['props']) {
+        const superProps = FeatureModel.superProps(props);
+        super({
+            ...superProps,
+            child: {},
+        });
+    }
+    
+    @Model.onInit()
+    private _useStateModify() {
+        if (!this.parent) return;
+        console.log('delegate start')
+        this.bindDecor(
+            this.parent,
+            (state) => ({
+                ...state,
+                gender: GenderType.SUPER_MALE,
+                emotion: EmotionType.ANGRY,
+            })
+        )
+        console.log('delegate end')
+    }
 }

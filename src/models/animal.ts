@@ -1,5 +1,5 @@
 import { Model, Event, FactoryService, ValidateService, SyncService, Value } from "set-piece";
-import { FlyModel, BreedModel, SwimModel } from "./features";
+import { FlyModel, BreedModel, SwimModel, SuperMaleModel } from "./features";
 import { EmotionType, GenderType } from "@/utils/types";    
 
 type BornEvent = Event<{ target: AnimalModel }>
@@ -26,22 +26,20 @@ export class AnimalModel<
     C & {
         fly: FlyModel,
         swim: SwimModel,
-        breed: BreedModel<T>
+        breed: BreedModel<T>,
+        superMale?: SuperMaleModel,
     }
 > {
-    get refer(): {
-        mother?: AnimalModel,
-    } {
-        return {
-            mother: this.queryParent(AnimalModel)
-        }
-    }
-
 
     static superProps<M extends AnimalModel>(
         props: M['props']
     ) {
-        const gender = SyncService.random.int(GenderType.MALE, GenderType.UNKNOWN)
+        const genders = [
+            GenderType.MALE,
+            GenderType.FEMALE,
+            GenderType.UNKNOWN,
+        ]
+        const gender = genders[SyncService.random.int(0, genders.length - 1)]
         return {
             ...props,
             state: {
@@ -53,18 +51,15 @@ export class AnimalModel<
                 swim: props.child?.swim ?? new SwimModel({}),
                 fly: props.child?.fly ?? new FlyModel({}),
                 breed: props.child?.breed ?? new BreedModel({}),
+                superMale: props.child?.superMale,
             }
         }
     }
 
-    isAlive() { return this.state.isAlive }
-    isFemale() { return this.state.gender === GenderType.FEMALE }
-
-
-    @ValidateService.useCheck(model => model.isAlive())
+    @ValidateService.useCheck(model => model.state.isAlive)
     growup() {
         const agePrev = this.state.age;
-        this.stateDraft.age++;
+        this.stateProxy.age++;
         this.emitEvent(
             this.event.onGrow,
             {
@@ -77,13 +72,17 @@ export class AnimalModel<
         }
     }
 
+    @ValidateService.useCheck(model => model.state.isAlive)
     die() {
-        this.stateDraft.isAlive = false;
+        this.stateProxy.isAlive = false;
         this.emitEvent(this.event.onDie, { target: this });
     }
 }
 
-
+@SwimModel.useFeature({
+    isEnabled: true,
+    speedLimit: 10,
+})
 export class PetModel<
     T extends AnimalModel = AnimalModel,
     S extends Record<string, Value> = {},
@@ -114,19 +113,13 @@ export class PetModel<
             },
         }
     }
- 
-    debug() {
-        super.debug();
-        const a: number = this.state.price;
-        const b: string = this.state.name;
-        const c: SwimModel = this.child.swim;
-    }
 }
 
 type PlayEvent = Event<{ target: DogModel }>
 type FeedEvent = Event<{ target: DogModel }>
 
 @FactoryService.useProduct('dog')
+@Model.useDecor({ emotion: true, gender: true })
 export class DogModel extends PetModel<
     DogModel,
     {
@@ -139,13 +132,8 @@ export class DogModel extends PetModel<
         onChildPlay: PlayEvent;
     }
 > {
-    get refer(): {
-        mother?: DogModel,
-    } {
-        return {
-            ...super.refer,
-            mother: this.queryParent(DogModel)
-        }
+    get mother(): DogModel | undefined {
+        return this.queryParent(DogModel);
     }
 
     constructor(props: DogModel['props']) {
@@ -164,32 +152,30 @@ export class DogModel extends PetModel<
 
     @Model.onInit()
     private _useSiblingPlay() {
-        const mother = this.refer.mother;
-        if (mother) {
-            this.bindEvent(mother.event.onChildPlay, (event) => {
-                this.stateDraft.emotion = EmotionType.HAPPY;
-            })
-        }
+        console.log('on-init');
+        if (!this.mother) return;
+        this.bindEvent(this.mother.event.onChildPlay, (event) => {
+            const isJoined = SyncService.random.float(0, 1) > 0.5;
+            if (!isJoined) return;
+            this.stateProxy.emotion = EmotionType.HAPPY;
+        })
     }
 
     @Model.onChildInit()
     private _useChildPlay(child: Model) {
         if (!(child instanceof DogModel)) return;
-        if (child.refer.mother === this) {
-            this.bindEvent(child.event.onPlay, (event) => {
-                this.emitEvent(this.event.onChildPlay, event);
-            })
-        }
+        if (child.mother !== this) return;
+        this.bindEvent(child.event.onPlay, (event) => {
+            this.emitEvent(this.event.onChildPlay, event);
+        })
     }
 
-
-    @ValidateService.useCheck(model => model.isAlive())
+    @ValidateService.useCheck(model => model.state.isAlive)
     playGame() {
-        this.stateDraft.emotion = EmotionType.HAPPY;
+        this.stateProxy.emotion = EmotionType.HAPPY;
         this.emitEvent(this.event.onPlay, {
             target: this
         });
     }
-
     
 }

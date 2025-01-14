@@ -1,7 +1,6 @@
 {
-  "name": "demo",
+  "name": "set-piece-demo",
   "version": "0.1.0",
-  "description": "A TypeScript model framework",
   "private": true,
   "dependencies": {
     "dayjs": "^1.11.10",

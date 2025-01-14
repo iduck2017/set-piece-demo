@@ -22,12 +22,12 @@ export class RootModel extends Model<{
     }
 
     countup() {
-        this.stateDraft.count++;
+        this.stateProxy.count++;
         return undefined;
     }
 
     @ValidateService.useCheck(model => !model.child.dog)
-    spawnDog() {
+    startGame() {
         const chunk = localStorage.getItem('demo');
         let dog: DogModel | undefined = undefined;
         if (chunk) {
@@ -41,20 +41,20 @@ export class RootModel extends Model<{
                 gender: GenderType.FEMALE
             },
         });
-        this.childDraft.dog = dog
+        this.childProxy.dog = dog
         this.emitEvent(this.event.onStart, { target: this });
         return undefined;
     }
 
     @ValidateService.useCheck(model => model.child.dog)
-    removeDog() {
-        delete this.childDraft.dog;
+    quitGame() {
+        delete this.childProxy.dog;
         this.emitEvent(this.event.onQuit, { target: this });
         return undefined;
     }
 
     @ValidateService.useCheck(model => model.child.dog)
-    saveDog() {
+    save() {
         if (!this.child.dog) return;
         const chunk = FactoryService.serialize(this.child.dog);
         if (!chunk) return;
