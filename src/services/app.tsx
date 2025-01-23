@@ -1,5 +1,5 @@
 import React from "react";
-import { RootView } from "@/debug/root";
+import { RootView } from "@/views/root";
 import { createRoot } from "react-dom/client";
 import { RootModel } from "@/models/root";
 

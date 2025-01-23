@@ -1,4 +1,4 @@
-import { Model, Event, FactoryService, ValidateService, Value, SyncService } from "set-piece";
+import { Model, Event, FactoryService, Value, SyncService } from "set-piece";
 import { AnimalModel, DieEvent, DogModel } from "./animal";
 import { RootModel } from "./root";
 import { EmotionType, GenderType } from "@/utils/types";
@@ -28,10 +28,6 @@ export class FeatureModel<
             isAlive: this.parent?.state.isAlive ?? false,
             isFemale: this.parent?.state.gender === GenderType.FEMALE,
         }
-    }
-
-    get root(): RootModel | undefined {
-        return this.queryParent(RootModel);
     }
 }
 
@@ -66,9 +62,9 @@ export class FlyModel extends FeatureModel<
         });
     }
 
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
-    @ValidateService.useCheck(model => model.state.isFlying)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.isFlying)
     ascend(height?: number) {
         if (!height) height = 1;
         this.stateProxy.height = Math.min(
@@ -77,9 +73,9 @@ export class FlyModel extends FeatureModel<
         );
     }
 
-    @ValidateService.useCheck(model => model.state.isFlying)
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isFlying)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
     accelerate(speed?: number) {
         if (!speed) speed = 1;
         this.stateProxy.speed = Math.min(
@@ -89,9 +85,9 @@ export class FlyModel extends FeatureModel<
     }
 
 
-    @ValidateService.useCheck(model => !model.state.isFlying)
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => !model.state.isFlying)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
     fly() {
         this.stateProxy.isFlying = true;
         this.emitEvent(this.event.onFly, {
@@ -99,9 +95,9 @@ export class FlyModel extends FeatureModel<
         });
     }
 
-    @ValidateService.useCheck(model => model.state.isFlying)
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isFlying)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
     land() {
         this.stateProxy.isFlying = false;
         this.emitEvent(this.event.onLand, {
@@ -154,8 +150,9 @@ export class SwimModel extends FeatureModel<
         });
     }
 
-    @Model.onInit()
+    @Model.onLoad()
     @Model.useAutomic()
+    @Model.useLogger()
     private _useRule() {
         if (!this.parent) return;
         let constructor: any = this.parent.constructor;
@@ -170,9 +167,9 @@ export class SwimModel extends FeatureModel<
         }
     }
 
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
-    @ValidateService.useCheck(model => model.state.isSwimming)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.isSwimming)
     accelerate(speed?: number) {
         if (!speed) speed = 1;
         this.stateProxy.speed = Math.min(
@@ -181,9 +178,9 @@ export class SwimModel extends FeatureModel<
         );
     }
 
-    @ValidateService.useCheck(model => !model.state.isSwimming)
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => !model.state.isSwimming)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
     swim() {
         this.stateProxy.isSwimming = true;
         this.emitEvent(this.event.onSwim, {
@@ -191,9 +188,9 @@ export class SwimModel extends FeatureModel<
         });
     }
 
-    @ValidateService.useCheck(model => model.state.isSwimming)
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isSwimming)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
     land() {
         this.stateProxy.isSwimming = false;
         this.emitEvent(this.event.onDive, {
@@ -231,9 +228,9 @@ export class BreedModel<
         });
     }
 
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.state.isAlive)
-    @ValidateService.useCheck(model => model.state.isFemale)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.isFemale)
     spawnChild(props?: T['props']): T | undefined {
         const parent = this.parent;
         if (!parent) return undefined;
@@ -246,7 +243,7 @@ export class BreedModel<
                 ...props,
                 child: {
                     ...props.child,
-                    superMale: new SuperMaleModel({}),
+                    // superMale: new SuperMaleModel({}),
                 }
             }
         }
@@ -264,9 +261,9 @@ export class BreedModel<
         return child;
     }
 
-    @ValidateService.useCheck(model => model.state.isEnabled)
-    @ValidateService.useCheck(model => model.child.length)
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.child.length)
+    @Model.if(model => model.state.isAlive)
     cloneChild(index?: number): T | undefined {
         const child = this.child[index ?? 0];
 
@@ -279,9 +276,9 @@ export class BreedModel<
         return child;
     }
 
-    @ValidateService.useCheck(model => model.child.length)
-    @ValidateService.useCheck(model => model.state.isAlive)
-    @ValidateService.useCheck(model => model.state.isFemale)
+    @Model.if(model => model.child.length)
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.isFemale)
     destroyChild(index?: number) {
         const child = this.child[index ?? 0];
         if (!child) return;
@@ -290,7 +287,7 @@ export class BreedModel<
         return result;
     }
 
-    @Model.onChildInit()
+    @Model.onChildLoad()
     private _useChildDie(child: Model) {
         if (!(child instanceof AnimalModel)) return;
         if (child.parent !== this) return;
@@ -306,30 +303,4 @@ export class BreedModel<
         event.target.debug();
     }
 
-}
-
-@FactoryService.useProduct('super-male')
-export class SuperMaleModel extends FeatureModel {
-    constructor(props: SuperMaleModel['props']) {
-        const superProps = FeatureModel.superProps(props);
-        super({
-            ...superProps,
-            child: {},
-        });
-    }
-    
-    @Model.onInit()
-    private _useStateModify() {
-        if (!this.parent) return;
-        console.log('delegate start')
-        this.bindDecor(
-            this.parent,
-            (state) => ({
-                ...state,
-                gender: GenderType.SUPER_MALE,
-                emotion: EmotionType.ANGRY,
-            })
-        )
-        console.log('delegate end')
-    }
 }

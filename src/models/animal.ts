@@ -1,5 +1,5 @@
-import { Model, Event, FactoryService, ValidateService, SyncService, Value } from "set-piece";
-import { FlyModel, BreedModel, SwimModel, SuperMaleModel } from "./features";
+import { Model, Event, FactoryService, SyncService, Value } from "set-piece";
+import { FlyModel, BreedModel, SwimModel } from "./features";
 import { EmotionType, GenderType } from "@/utils/types";    
 
 type BornEvent = Event<{ target: AnimalModel }>
@@ -27,7 +27,7 @@ export class AnimalModel<
         fly: FlyModel,
         swim: SwimModel,
         breed: BreedModel<T>,
-        superMale?: SuperMaleModel,
+        // superMale?: SuperMaleModel,
     }
 > {
 
@@ -51,12 +51,12 @@ export class AnimalModel<
                 swim: props.child?.swim ?? new SwimModel({}),
                 fly: props.child?.fly ?? new FlyModel({}),
                 breed: props.child?.breed ?? new BreedModel({}),
-                superMale: props.child?.superMale,
+                // superMale: props.child?.superMale,
             }
         }
     }
 
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isAlive)
     growup() {
         const agePrev = this.state.age;
         this.stateProxy.age++;
@@ -72,7 +72,7 @@ export class AnimalModel<
         }
     }
 
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isAlive)
     die() {
         this.stateProxy.isAlive = false;
         this.emitEvent(this.event.onDie, { target: this });
@@ -119,7 +119,7 @@ type PlayEvent = Event<{ target: DogModel }>
 type FeedEvent = Event<{ target: DogModel }>
 
 @FactoryService.useProduct('dog')
-@Model.useDecor({ emotion: true, gender: true })
+@Model.useModifier()
 export class DogModel extends PetModel<
     DogModel,
     {
@@ -132,10 +132,6 @@ export class DogModel extends PetModel<
         onChildPlay: PlayEvent;
     }
 > {
-    get mother(): DogModel | undefined {
-        return this.queryParent(DogModel);
-    }
-
     constructor(props: DogModel['props']) {
         const superProps = DogModel.superProps(props);
         super({
@@ -150,27 +146,28 @@ export class DogModel extends PetModel<
         });
     }
 
-    @Model.onInit()
+    @Model.onLoad()
+    @Model.useLogger()
     private _useSiblingPlay() {
-        console.log('on-init');
-        if (!this.mother) return;
-        this.bindEvent(this.mother.event.onChildPlay, (event) => {
+        if (!(this?.parent?.parent instanceof DogModel)) return;
+        this.bindEvent(this.parent.parent.event.onChildPlay, (event) => {
             const isJoined = SyncService.random.float(0, 1) > 0.5;
             if (!isJoined) return;
             this.stateProxy.emotion = EmotionType.HAPPY;
         })
     }
 
-    @Model.onChildInit()
+    @Model.onChildLoad()
+    @Model.useLogger()
     private _useChildPlay(child: Model) {
         if (!(child instanceof DogModel)) return;
-        if (child.mother !== this) return;
+        if (child.parent.parent !== this) return;
         this.bindEvent(child.event.onPlay, (event) => {
             this.emitEvent(this.event.onChildPlay, event);
         })
     }
 
-    @ValidateService.useCheck(model => model.state.isAlive)
+    @Model.if(model => model.state.isAlive)
     playGame() {
         this.stateProxy.emotion = EmotionType.HAPPY;
         this.emitEvent(this.event.onPlay, {

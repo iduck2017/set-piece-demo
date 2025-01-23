@@ -1,8 +1,8 @@
-import { Model, FactoryService, ValidateService, Event } from "set-piece";
+import { Model, FactoryService, Event } from "set-piece";
 import { DogModel } from "./animal";
 import { GenderType } from "@/utils/types";
 
-@Model.asRoot()
+@Model.useRoot()
 export class RootModel extends Model<{
     count: number
 }, {
@@ -21,13 +21,15 @@ export class RootModel extends Model<{
         });
     }
 
+    @Model.useAutomic()
+    @Model.useLogger()
     countup() {
-        this.stateProxy.count++;
-        return undefined;
+        this.setState(prev => ({ count: prev.count + 1 }));
+        this.setState(prev => ({ count: prev.count + 1 }));
     }
 
-    @ValidateService.useCheck(model => !model.child.dog)
-    startGame() {
+    @Model.if(model => !model.child.dog)
+    start() {
         const chunk = localStorage.getItem('demo');
         let dog: DogModel | undefined = undefined;
         if (chunk) {
@@ -37,23 +39,20 @@ export class RootModel extends Model<{
             } catch (error) {}
         }
         if (!dog) dog = new DogModel({
-            state: {
-                gender: GenderType.FEMALE
-            },
+            state: { gender: GenderType.FEMALE },
         });
         this.childProxy.dog = dog
         this.emitEvent(this.event.onStart, { target: this });
-        return undefined;
     }
 
-    @ValidateService.useCheck(model => model.child.dog)
-    quitGame() {
+    @Model.if(model => model.child.dog)
+    quit() {
         delete this.childProxy.dog;
         this.emitEvent(this.event.onQuit, { target: this });
         return undefined;
     }
 
-    @ValidateService.useCheck(model => model.child.dog)
+    @Model.if(model => model.child.dog)
     save() {
         if (!this.child.dog) return;
         const chunk = FactoryService.serialize(this.child.dog);
