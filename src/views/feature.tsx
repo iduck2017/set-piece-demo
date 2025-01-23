@@ -12,9 +12,9 @@ export function BreedView(props: {
         model={props.model} 
         state={
             <>
-                <Link model={props.model} method={props.model?.spawnChild} />
-                <Link model={props.model} method={props.model?.cloneChild} />
-                <Link model={props.model} method={props.model?.destroyChild} />
+                <Link model={props.model} method={props.model?.spawnChild} args={[]} />
+                <Link model={props.model} method={props.model?.cloneChild} args={[]} />
+                <Link model={props.model} method={props.model?.destroyChild} args={[]} />
                 <State model={props.model} />
             </>
         }

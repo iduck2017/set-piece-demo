@@ -12,7 +12,7 @@ export function AnimalView(props: {
         model={props.model} 
         state={
             <>
-                <Link model={props.model} method={props.model?.growup} />
+                <Link model={props.model} method={props.model?.growup} args={[]} />
                 <State model={props.model} />
             </>
         }
