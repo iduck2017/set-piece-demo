@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { RootModel } from "@/models/root";
-import { View, Link, useModel, State } from "set-piece";
+import { Model } from "set-piece";
 import { AnimalView } from "./animal";
 
 export function RootView(props: {
@@ -9,7 +9,7 @@ export function RootView(props: {
     const { child } = useModel(props.model);
     
     useEffect(() => {
-        // props.model.start();
+        props.model.start();
     }, [])
 
     return <View 

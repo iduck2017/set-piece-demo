@@ -1,51 +1,97 @@
 import { Model, Event, FactoryService, Value, SyncService } from "set-piece";
-import { AnimalModel, DieEvent, DogModel } from "./animal";
-import { RootModel } from "./root";
-import { EmotionType, GenderType } from "@/utils/types";
+import { AnimalModel, DieEvent } from "./animal";
+import { GenderType } from "@/utils/types";
+
+interface FeatureConfig {
+    isEnabledDefault: boolean,
+}
+
+type Constructor<M = any> = new (...args: any[]) => M
 
 export class FeatureModel<
     S extends Record<string, Value> = {},
     E extends Record<string, Event> = {},
     C extends Record<string, Model> | Model[] = any,
 > extends Model<
-    S & { isEnabled: boolean }, 
+    S & { isEnabledMask?: boolean }, 
     E, 
     C, 
     AnimalModel
 > {
+    protected static superConfig<T>(constructor: any, rules: Map<Function, T>): Partial<T> {
+        let _constructor: any = constructor;
+        while (_constructor.__proto__ !== null) {
+            const superRule = rules.get(_constructor);
+            if (superRule) return superRule;
+            _constructor = _constructor.__proto__;
+        }
+        return {};
+    }
+    
     protected static superProps<T extends FeatureModel>(props: T['props']) {
         return {
             ...props,
             state: {
-                isEnabled: props.state?.isEnabled ?? false,
+                isEnabledMask: props.state?.isEnabledMask,
             }
         }
     }
 
+    get config(): FeatureConfig {
+        return { isEnabledDefault: false }
+    }
+
     get state() {
+        const superState = super.state;
         return {
-            ...super.state,
+            ...superState,
             isAlive: this.parent?.state.isAlive ?? false,
             isFemale: this.parent?.state.gender === GenderType.FEMALE,
+            isEnabled: superState.isEnabledMask ?? this.config.isEnabledDefault,
+            age: this.parent?.state.age ?? NaN
         }
     }
+}
+
+interface FlyConfig extends FeatureConfig {
+    heightLimit: number,
+    speedLimit: number,
 }
 
 @FactoryService.useProduct('fly')
 export class FlyModel extends FeatureModel<
     { 
         isFlying: boolean,
-        heightLimit: number,
         height: number,
-        speedLimit: number
         speed: number
     },
     {
         onFly: Event<{ target: FlyModel }>
         onLand: Event<{ target: FlyModel }>
+        onEnable: Event<{ target: FlyModel }>
+        onDisable: Event<{ target: FlyModel }>
     },
     {}
 > {
+    protected static _config: Map<Function, FlyConfig> = new Map();
+
+    static useConfig(config: FlyConfig) {
+        return function (constructor: Constructor<Model>) {
+            FlyModel._config.set(constructor, config);
+        }
+    }
+
+    get config(): FlyConfig {
+        const defaultConfig: FlyConfig = {
+            isEnabledDefault: false,
+            heightLimit: 10,
+            speedLimit: 10,
+        }
+        if (!this.parent) return defaultConfig;
+        const config = FlyModel._config.get(this.parent.constructor);
+        return config ?? defaultConfig;
+    }
+
     constructor(props: FlyModel['props']) {
         const superProps = FeatureModel.superProps(props);
         super({
@@ -53,12 +99,28 @@ export class FlyModel extends FeatureModel<
             state: {
                 ...superProps.state,
                 isFlying: props.state?.isFlying ?? false,
-                speedLimit: props.state?.speedLimit ?? 1,
                 speed: props.state?.speed ?? 1,
-                heightLimit: props.state?.heightLimit ?? 1,
                 height: props.state?.height ?? 1,
             },
             child: {},
+        });
+    }
+
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => !model.state.isEnabled)
+    enable() {
+        this.stateProxy.isEnabledMask = true;
+        this.emitEvent(this.event.onEnable, {
+            target: this,
+        });
+    }
+
+    @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.isEnabled)
+    disable() {
+        this.stateProxy.isEnabledMask = false;
+        this.emitEvent(this.event.onDisable, {
+            target: this,
         });
     }
 
@@ -69,18 +131,19 @@ export class FlyModel extends FeatureModel<
         if (!height) height = 1;
         this.stateProxy.height = Math.min(
             this.state.height + height, 
-            this.state.heightLimit
+            this.config.heightLimit
         );
     }
 
     @Model.if(model => model.state.isFlying)
-    @Model.if(model => model.state.isEnabled)
+    @Model.if(model => model.state.isEnabledMask)
     @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.state.speed < model.config.speedLimit)
     accelerate(speed?: number) {
         if (!speed) speed = 1;
         this.stateProxy.speed = Math.min(
             this.state.speed + speed, 
-            this.state.speedLimit
+            this.config.speedLimit
         );
     }
 
@@ -99,18 +162,28 @@ export class FlyModel extends FeatureModel<
     @Model.if(model => model.state.isEnabled)
     @Model.if(model => model.state.isAlive)
     land() {
-        this.stateProxy.isFlying = false;
+        this._land();
         this.emitEvent(this.event.onLand, {
             target: this,
         });
     }
+
+    @Model.useAutomic()
+    private _land() {
+        this.stateProxy.isFlying = false;
+        this.stateProxy.speed = 0;
+    }
+
+}
+
+interface SwimConfig extends FeatureConfig {
+    speedLimit: number,
 }
 
 @FactoryService.useProduct('swim')
 export class SwimModel extends FeatureModel<
     { 
         isSwimming: boolean,
-        speedLimit: number,
         speed: number
     },
     {
@@ -121,20 +194,28 @@ export class SwimModel extends FeatureModel<
     },
     {}
 > {
-    private static _rules: Map<Function, {
-        isEnabled: boolean,
-        speedLimit: number,
-    }> = new Map();
+    protected static _config: Map<Function, SwimConfig> = new Map();
     
-    static useFeature(rule: {
-        isEnabled: boolean,
-        speedLimit: number,
-    }) {
-        return function (constructor: new (...args: any[]) => Model) {
-            SwimModel._rules.set(constructor, rule);
+    static useConfig(config: SwimConfig) {
+        return function (constructor: Constructor<Model>) {
+            SwimModel._config.set(constructor, config);
         };
     }
 
+    get config(): SwimConfig {
+        const defaultConfig: SwimConfig = {
+            isEnabledDefault: false,
+            speedLimit: 10,
+        }
+        if (!this.parent) return defaultConfig;
+        const config = SwimModel._config.get(this.parent.constructor);
+        return config ?? defaultConfig;
+    }
+
+    debug() {
+        super.debug();
+        console.log(this.config);
+    }
 
     constructor(props: SwimModel['props']) {
         const superProps = FeatureModel.superProps(props);
@@ -143,28 +224,10 @@ export class SwimModel extends FeatureModel<
             state: {
                 ...superProps.state,
                 isSwimming: props.state?.isSwimming ?? false,
-                speedLimit: props.state?.speedLimit ?? 1,
-                speed: props.state?.speed ?? 1,
+                speed: props.state?.speed ?? 0,
             },
             child: {},
         });
-    }
-
-    @Model.onLoad()
-    @Model.useAutomic()
-    @Model.useLogger()
-    private _useRule() {
-        if (!this.parent) return;
-        let constructor: any = this.parent.constructor;
-        while (constructor) {
-            const rule = SwimModel._rules.get(constructor);
-            if (rule) {
-                this.stateProxy.speedLimit = rule.speedLimit;
-                this.stateProxy.isEnabled = rule.isEnabled;
-                return;
-            }
-            constructor = constructor.__proto__;
-        }
     }
 
     @Model.if(model => model.state.isEnabled)
@@ -174,7 +237,7 @@ export class SwimModel extends FeatureModel<
         if (!speed) speed = 1;
         this.stateProxy.speed = Math.min(
             this.state.speed + speed, 
-            this.state.speedLimit
+            this.config.speedLimit
         );
     }
 
@@ -192,15 +255,26 @@ export class SwimModel extends FeatureModel<
     @Model.if(model => model.state.isEnabled)
     @Model.if(model => model.state.isAlive)
     land() {
-        this.stateProxy.isSwimming = false;
+        this._land();
         this.emitEvent(this.event.onDive, {
             target: this,
         });
     }
+
+    @Model.useAutomic()
+    private _land() {
+        this.stateProxy.isSwimming = false;
+        this.stateProxy.speed = 0;
+    }
+
 }
 
 
-
+interface BreedConfig extends FeatureConfig {
+    childLimit: number;
+    ageMaxium: number;
+    ageMinium: number;
+}
 
 type SpawnEvent = Event<{ target: BreedModel, child: AnimalModel }>
 type CloneEvent = Event<{ target: BreedModel, child: AnimalModel }>
@@ -216,6 +290,14 @@ export class BreedModel<
     },
     T[]
 > {
+    protected static _config: Map<Function, BreedConfig> = new Map()
+
+    static useConfig(config: BreedConfig) {
+        return function (constructor: Constructor<Model>) {
+            BreedModel._config.set(constructor, config)
+        }
+    }
+
     constructor(props: BreedModel<T>['props']) {
         const superProps = FeatureModel.superProps(props);
         super({
@@ -223,14 +305,28 @@ export class BreedModel<
             child: props.child ?? [],
             state: {
                 ...superProps.state,
-                isEnabled: true,
             }
         });
+    }
+
+    get config(): BreedConfig {
+        const defaultConfig: BreedConfig = {
+            ageMaxium: 1,
+            ageMinium: 1,
+            childLimit: 3,
+            isEnabledDefault: false,
+        }
+        if (!this.parent) return defaultConfig;
+        const config = BreedModel._config.get(this.parent.constructor);
+        return config ?? defaultConfig;
     }
 
     @Model.if(model => model.state.isEnabled)
     @Model.if(model => model.state.isAlive)
     @Model.if(model => model.state.isFemale)
+    @Model.if(model => model.state.age <= model.config.ageMaxium)
+    @Model.if(model => model.state.age >= model.config.ageMinium)
+    @Model.if(model => model.child.length < model.config.childLimit)
     spawnChild(props?: T['props']): T | undefined {
         const parent = this.parent;
         if (!parent) return undefined;
@@ -264,6 +360,7 @@ export class BreedModel<
     @Model.if(model => model.state.isEnabled)
     @Model.if(model => model.child.length)
     @Model.if(model => model.state.isAlive)
+    @Model.if(model => model.child.length < model.config.childLimit)
     cloneChild(index?: number): T | undefined {
         const child = this.child[index ?? 0];
 
@@ -278,29 +375,58 @@ export class BreedModel<
 
     @Model.if(model => model.child.length)
     @Model.if(model => model.state.isAlive)
-    @Model.if(model => model.state.isFemale)
-    destroyChild(index?: number) {
-        const child = this.child[index ?? 0];
+    @Model.useLogger()
+    disposeChild(event?: DieEvent) {
+        const child = event?.target ?? this.child[0];
         if (!child) return;
         const result = this.removeChild(child);
-        result?.debug();
         return result;
     }
 
     @Model.onChildLoad()
+    @Model.useLogger()
     private _useChildDie(child: Model) {
         if (!(child instanceof AnimalModel)) return;
         if (child.parent !== this) return;
         this.bindEvent(
             child.event.onDie,
-            this._disposeChild
+            this.disposeChild
         )
     }
+}
 
-    @Model.useAutomic()
-    private _disposeChild(event: DieEvent) {
-        this.removeChild(event.target);
-        event.target.debug();
+@FactoryService.useProduct('disease')
+export class DiseaseModel extends FeatureModel<{
+    ageWaste: number,
+}> {
+    constructor(props: DiseaseModel['props']) {
+        super({
+            ...props,
+            state: {
+                ageWaste: props.state?.ageWaste ?? 1,
+            },
+            child: {},
+        });
     }
 
+    @Model.if(model => model.state.isAlive)
+    deteriorate() {
+        this.stateProxy.ageWaste += 1;
+        this.parent?.reloadState()
+    }
+
+    @Model.onLoad()
+    private _useAgeUpdate() {
+        const parent = this.parent;
+        if (!parent) return;
+        this.bindState(
+            this.parent,
+            (prevState) => {
+                return {
+                    ...prevState,
+                    ageLimit: prevState.ageLimit - this.state.ageWaste,
+                }
+            }
+        )
+    }
 }

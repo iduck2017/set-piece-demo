@@ -30,3 +30,5 @@ export class AppService {
     }
 }
 
+
+AppService.init();

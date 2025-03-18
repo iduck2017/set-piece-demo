@@ -1,5 +1,5 @@
 import { Model, Event, FactoryService, SyncService, Value } from "set-piece";
-import { FlyModel, BreedModel, SwimModel } from "./features";
+import { FlyModel, BreedModel, SwimModel, DiseaseModel } from "./features";
 import { EmotionType, GenderType } from "@/utils/types";    
 
 type BornEvent = Event<{ target: AnimalModel }>
@@ -14,8 +14,8 @@ export class AnimalModel<
 > extends Model<
     S & { 
         isAlive: boolean 
-        ageLimit: number
         age: number,
+        ageLimit: number,
         gender: GenderType
     },
     E & {
@@ -24,13 +24,12 @@ export class AnimalModel<
         onGrow: GrowEvent
     },
     C & {
-        fly: FlyModel,
-        swim: SwimModel,
+        fly?: FlyModel,
+        swim?: SwimModel,
         breed: BreedModel<T>,
-        // superMale?: SuperMaleModel,
+        disease?: DiseaseModel
     }
 > {
-
     static superProps<M extends AnimalModel>(
         props: M['props']
     ) {
@@ -48,15 +47,16 @@ export class AnimalModel<
                 gender: props.state?.gender ?? gender
             },
             child: {
-                swim: props.child?.swim ?? new SwimModel({}),
-                fly: props.child?.fly ?? new FlyModel({}),
                 breed: props.child?.breed ?? new BreedModel({}),
-                // superMale: props.child?.superMale,
+                fly: props.child?.fly ?? new FlyModel({}),
+                swim: props.child?.swim ?? new SwimModel({}),
+                disease: props.child?.disease ?? new DiseaseModel({})
             }
         }
     }
 
     @Model.if(model => model.state.isAlive)
+    @Model.useLogger()
     growup() {
         const agePrev = this.state.age;
         this.stateProxy.age++;
@@ -68,21 +68,24 @@ export class AnimalModel<
             }
         )
         if (this.state.age >= this.state.ageLimit) {
-            this.die();
+            this._die();
         }
     }
 
     @Model.if(model => model.state.isAlive)
-    die() {
+    @Model.useLogger()
+    private _die() {
         this.stateProxy.isAlive = false;
         this.emitEvent(this.event.onDie, { target: this });
     }
+
+    @Model.if(model => !model.child.disease)
+    @Model.if(model => model.state.isAlive)
+    sick() {
+        this.childProxy.disease = new DiseaseModel({});
+    }
 }
 
-@SwimModel.useFeature({
-    isEnabled: true,
-    speedLimit: 10,
-})
 export class PetModel<
     T extends AnimalModel = AnimalModel,
     S extends Record<string, Value> = {},
@@ -118,6 +121,16 @@ export class PetModel<
 type PlayEvent = Event<{ target: DogModel }>
 type FeedEvent = Event<{ target: DogModel }>
 
+@SwimModel.useConfig({
+    isEnabledDefault: true,
+    speedLimit: 3
+})
+@BreedModel.useConfig({
+    isEnabledDefault: true,
+    ageMinium: 5,
+    ageMaxium: 15,
+    childLimit: 3,
+})
 @FactoryService.useProduct('dog')
 @Model.useModifier()
 export class DogModel extends PetModel<
@@ -138,10 +151,14 @@ export class DogModel extends PetModel<
             ...superProps,
             state: {
                 ...superProps.state,
+                ageLimit: props.state?.ageLimit ?? 10,
                 price: props.state?.price ?? 5000,
-                ageLimit: props.state?.ageLimit ?? 20,
                 name: props.state?.name ?? 'Bob',
                 emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
+            },
+            child: {
+                ...superProps.child,
+                swim: props.child?.swim ?? new SwimModel({}),
             }
         });
     }
@@ -149,10 +166,9 @@ export class DogModel extends PetModel<
     @Model.onLoad()
     @Model.useLogger()
     private _useSiblingPlay() {
-        if (!(this?.parent?.parent instanceof DogModel)) return;
-        this.bindEvent(this.parent.parent.event.onChildPlay, (event) => {
-            const isJoined = SyncService.random.float(0, 1) > 0.5;
-            if (!isJoined) return;
+        const bioParent = this?.parent?.parent;
+        if (!(bioParent instanceof DogModel)) return;
+        this.bindEvent(bioParent.event.onChildPlay, (event) => {
             this.stateProxy.emotion = EmotionType.HAPPY;
         })
     }

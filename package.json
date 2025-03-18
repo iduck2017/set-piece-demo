@@ -43,7 +43,6 @@
     "react-dom": "^18.x.x"
   },
   "scripts": {
-    "watch": "webpack -w",
     "build": "webpack --mode production",
     "serve": "webpack serve",
     "prepublishOnly": "npm run build",
