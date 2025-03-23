@@ -1,17 +1,24 @@
 import { DebugService, Model } from "set-piece";
+import { LeafModel } from "./leaf";
 
 export namespace RootDefine {
     export type I = 'root';
     export type E = { onPing: number }
     export type S1 = { count: number };
     export type S2 = { name: string };
+    export type P = undefined;
+    export type C1 = {};
+    export type C2 = LeafModel
 }
 
 export class RootModel extends Model<
     RootDefine.I,
     RootDefine.E,
     RootDefine.S1,
-    RootDefine.S2
+    RootDefine.S2,
+    RootDefine.P,
+    RootDefine.C1,
+    RootDefine.C2
 > {
     constructor(props: Model.Props<RootModel>) {
         super({
@@ -81,6 +88,27 @@ export class RootModel extends Model<
         this.stateDelegator.count += 1;
         this.eventEmitters.onPing(this.state.count)
         return this.state.count;
+    }
+
+    @DebugService.useStack()
+    spawn() {
+        console.group('step-1')
+        console.log(this.state.count)
+        console.log(this.child);
+        console.log(this.childDelegator)
+        console.groupEnd()
+        this.childDelegator.push({ code: 'leaf' })
+        console.group('step-2')
+        console.log(this.child);
+        console.log(this.childDelegator);
+        console.log(this.state.count);
+        console.groupEnd()
+        this.childDelegator.push({ code: 'leaf' })
+        console.group('step-3')
+        console.log(this.child);
+        console.log(this.childDelegator);
+        console.log(this.state.count);
+        console.groupEnd()
     }
 
     @Model.useDecor(model => model.decor.count)

@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { RootModel } from "./root";
-import { StoreService } from "set-piece";
+import { DebugService, StoreService } from "set-piece";
 
 export class AppService {
     private static rootView?: HTMLElement;
@@ -18,7 +18,7 @@ export class AppService {
         AppService.rootModel = new RootModel({
             code: 'root',
             uuid: StoreService.uuid,
-            path: undefined,
+            path: 'root',
             parent: undefined,
         });
         // View initialize
@@ -28,12 +28,18 @@ export class AppService {
         AppService.isInited = true;
     }
 
+    @DebugService.useStack()
     static test() {
         if (!AppService.rootModel) return;
-        console.log(AppService.rootModel.state.count)
-        // AppService.rootModel.batchAdd();
+        const root = AppService.rootModel;
+        console.log(root.state.count)
+        root.spawn();
         // AppService.rootModel.ping()
-        AppService.rootModel.add();
+        // AppService.rootModel.add();
+        // root.debug();
+        // console.log(root.queryChild(root.pathAbsolute));
+        // console.log(root.event.onPing.pathAbsolute)
+        // console.log(root.decor.count.pathAbsolute);
     }
 }
 
