@@ -1,48 +1,45 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { DebugService, Model, ModelCycle } from "set-piece";
 import { RootModel } from "./root";
-import { DebugService, StoreService } from "set-piece";
 
 export class AppService {
-    private static rootView?: HTMLElement;
-    private static rootModel?: RootModel;
+    private static _rootView?: HTMLElement;
+    
+    private static _rootModel?: RootModel;
+    public static get rootModel() {
+        return AppService._rootModel;
+    }
 
     private constructor() {}
 
-    private static isInited: boolean = false;
-
-    static async init() {
-        if (AppService.isInited) return;
-
-        // Model initialize
-        AppService.rootModel = new RootModel({
-            code: 'root',
-            uuid: StoreService.uuid,
-            path: 'root',
-            parent: undefined,
-        });
-        // View initialize
-        // AppService._rootView = document.getElementById("root") ?? undefined;
-        // if (!AppService._rootView) return;
-        // createRoot(AppService._rootView).render(<RootView model={this._rootModel} />);
-        AppService.isInited = true;
+    static async boot() {
+        AppService._rootModel = ModelCycle.boot(new RootModel({}));
+        (window as any).root = AppService._rootModel;
+        AppService._rootView = document.getElementById("root") ?? undefined;
+        if (!AppService._rootView) return;
+        createRoot(AppService._rootView).render(<h1>Hello World</h1>);
     }
 
-    @DebugService.useStack()
+    @DebugService.log()
     static test() {
-        if (!AppService.rootModel) return;
-        const root = AppService.rootModel;
-        console.log(root.state.count)
-        root.spawn();
-        // AppService.rootModel.ping()
-        // AppService.rootModel.add();
-        // root.debug();
-        // console.log(root.queryChild(root.pathAbsolute));
-        // console.log(root.event.onPing.pathAbsolute)
-        // console.log(root.decor.count.pathAbsolute);
+        if (!AppService._rootModel) return;
+        const root = AppService._rootModel;
+        console.log(root.proxy.event.onPing);
+        console.log(root.proxy.decor.count);
+        console.log(root.proxy.child.boss.event.onHello);
+        console.log(root.proxy.child.boss.decor.level);
+        console.log(root.proxy.child.boss.child.vice?.event.onHello)
+        console.log(root.proxy.child.boss.child[0].decor.name);
+
+        console.log('count:', root.state.count)
+        console.log('name:', root.state.name)
+        console.log('child', root.child.boss.uuid);
+
     }
 }
 
 
-AppService.init();
+(window as any).app = AppService;
+AppService.boot();
 AppService.test();

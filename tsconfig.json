@@ -11,13 +11,14 @@
       "moduleResolution": "node",
       "strict": true,
       "experimentalDecorators": true,
-      "strictFunctionTypes": true,
+      "strictFunctionTypes": false,
       "paths": {
-        "@/*": ["./src/*"],
+        "@/*": ["./src/*"]
       },
       "baseUrl": "."
     },
     "include": [
-      "src/**/*"
-    ],
+      "src/**/*",
+      "test/**/*"
+    ]
 }
