@@ -15,7 +15,7 @@ export class AppService {
 
     static async boot() {
         AppService._rootModel = ModelCycle.boot(new RootModel({}));
-        (window as any).root = AppService._rootModel;
+        window.app = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
         createRoot(AppService._rootView).render(<h1>Hello World</h1>);
@@ -34,12 +34,21 @@ export class AppService {
 
         console.log('count:', root.state.count)
         console.log('name:', root.state.name)
-        console.log('child', root.child.boss.uuid);
+        console.log('child:', root.child.boss.uuid);
 
+        root.child.boss.recruit();
+        root.child.boss.recruit();
+        root.ping();
+
+        root.child.boss.connect();
+
+        root.child.boss.dismiss();
+        console.log('refer:', root.child.boss.refer)
+
+        root.ping();
     }
 }
 
-
-(window as any).app = AppService;
+window.app = AppService;
 AppService.boot();
 AppService.test();

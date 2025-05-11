@@ -4,8 +4,8 @@ const { compilerOptions } = require('./tsconfig.json');
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    moduleFileExtensions: ['ts', 'js', 'tsx', 'jsx'],
-    testMatch: ['**/test/**/*.ts'],
+    moduleFileExtensions: ['ts', 'js'],
+    testMatch: ['**/test/**/*.test.ts'],
     cache: true,
     cacheDirectory: '.jest',
   

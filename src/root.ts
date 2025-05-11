@@ -1,8 +1,8 @@
-import { Model, StateAgent, EventAgent, StoreService } from "set-piece";
+import { Model, StateAgent, EventAgent, StoreService, DebugService } from "set-piece";
 import { StaffModel } from "./staff";
 
 export namespace RootDefine {
-    export type E = { onPing: number }
+    export type E = { onPing: string }
     export type S1 = { count: number };
     export type S2 = { name: string };
     export type P = never;
@@ -28,19 +28,38 @@ export class RootModel extends Model<
             ...props,
             state: { count: 0, name: 'Ing Soc', ...props.state },
             child: { boss: new StaffModel({}), ...props.child },
-            refer: { backup: [], ...props.refer },
         })
     }
 
-    @StateAgent.use(proxy => proxy.decor.count)
+    @StateAgent.use(model => model.proxy.decor.count)
     handleState(target: RootModel, value: number) {
         return value + 1;
     }
 
-    @EventAgent.use(proxy => proxy.event.onPing)
-    handleEvent(target: RootModel, event: number) {
-        console.log
+    @DebugService.log()
+    public ping() {
+        console.log('ping');
+        this.event.onPing('hello')
     }
+
+    public get state() {
+        return {
+            ...super.state,
+            version: '0.1.0'
+        }
+    }
+
+    @DebugService.log()
+    countup() {
+        console.log('version:', this.state.version);
+        console.log('count:', this.state.count, this.draft.state.count);
+        this.draft.state.count++;
+        console.log('count:', this.state.count, this.draft.state.count);
+        this.event.onPing('hello')
+    }
+    
+
+
 
 
 }
