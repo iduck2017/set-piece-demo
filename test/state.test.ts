@@ -1,22 +1,32 @@
-import { Model, ModelCycle, ModelStatus } from "set-piece"
-import { BunnyModel } from "./bunny";
+import { GenderType } from "@/common"
+import { StaffModel } from "./staff"
+import { IngSocModel } from "./ing-soc"
 
-test.skip('state', () => {
-    const bunny = new BunnyModel({
-        state: { speed: 10 }
-    });
-    
-    init: {
-        expect(bunny.state.isAlive).toBe(true);
-        expect(bunny.state.name).toBe('Judy');
-        expect(bunny.state.speed).toBe(10);
-    }
+test('state', () => {
+    const goldstein = new StaffModel({
+        state: {
+            name: "Emmanuel Goldstein",
+            gender: GenderType.MALE,
+            salary: 100,
+            money: 1000,
+        },
+    })
 
-    alter: {
-        bunny.alter();
-        expect(bunny.state.isAlive).toBe(false);
-        expect(bunny.state.name).toBe('Judy');
-        expect(bunny.state.speed).toBe(0);
-    }
+    expect(goldstein.state.name).toBe('Emmanuel Goldstein');
+    expect(goldstein.state.salary).toBe(100);
+    expect(goldstein.state.money).toBe(1000);
+    expect(goldstein.state.gender).toBe(GenderType.MALE);
+
+    const ingsoc = new IngSocModel();
+    const julia = ingsoc.child.minipax;
+
+    expect(julia?.state.name).toBe('Julia');
+    expect(julia?.state.salary).toBe(3);
+    expect(julia?.state.money).toBe(20);
+    expect(julia?.state.gender).toBe(GenderType.FEMALE);
+
+    julia?._alterMoney(5);
+    expect(julia?.state.money).toBe(25);
+
 })
 

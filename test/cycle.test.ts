@@ -2,45 +2,45 @@ import { ModelCycle, ModelStatus } from "set-piece";
 import { BunnyModel, GenderType } from "./bunny";
 
 test.skip('cycle', () => {
-    const bunny = new BunnyModel({});
-    const bunnyJane = new BunnyModel({
+    const judy = new BunnyModel({});
+    const jane = new BunnyModel({
         state: { name: 'Jane' }
     });
-    const bunnyJohn = new BunnyModel({
+    const john = new BunnyModel({
         state: { name: 'John', gender: GenderType.MALE }
     });
 
-    expect(bunnyJane.status).toBe(ModelStatus.INIT);
-    expect(bunny.status).toBe(ModelStatus.INIT);
-    expect(bunnyJohn.status).toBe(ModelStatus.INIT);
+    expect(jane.status).toBe(ModelStatus.INIT);
+    expect(judy.status).toBe(ModelStatus.INIT);
+    expect(john.status).toBe(ModelStatus.INIT);
     
     spawn: {
-        bunny.spawn(bunnyJane);
-        expect(bunny.status).toBe(ModelStatus.INIT);
-        expect(bunnyJane.status).toBe(ModelStatus.BIND);
-        expect(bunnyJohn.status).toBe(ModelStatus.INIT);
+        judy.spawn(jane);
+        expect(judy.status).toBe(ModelStatus.INIT);
+        expect(jane.status).toBe(ModelStatus.BIND);
+        expect(john.status).toBe(ModelStatus.INIT);
     }
     
     boot: {
-        ModelCycle.boot(bunny);
-        expect(bunny.status).toBe(ModelStatus.LOAD);
-        expect(bunnyJane.status).toBe(ModelStatus.LOAD);
-        expect(bunnyJohn.status).toBe(ModelStatus.INIT);
+        ModelCycle.boot(judy);
+        expect(judy.status).toBe(ModelStatus.LOAD);
+        expect(jane.status).toBe(ModelStatus.LOAD);
+        expect(john.status).toBe(ModelStatus.INIT);
     }
 
     spawn: {
-        bunnyJane.spawn(bunnyJohn);
-        expect(bunny.status).toBe(ModelStatus.LOAD);
-        expect(bunnyJane.status).toBe(ModelStatus.LOAD);
-        expect(bunnyJohn.status).toBe(ModelStatus.LOAD);
+        jane.spawn(john);
+        expect(judy.status).toBe(ModelStatus.LOAD);
+        expect(jane.status).toBe(ModelStatus.LOAD);
+        expect(john.status).toBe(ModelStatus.LOAD);
     }
 
     despawn: {
-        const result = bunny.despawn();
-        expect(result).toBe(bunnyJane);
-        expect(bunny.status).toBe(ModelStatus.LOAD);
-        expect(bunnyJane.status).toBe(ModelStatus.INIT);
-        expect(bunnyJohn.status).toBe(ModelStatus.BIND);
+        const result = judy.despawn();
+        expect(result).toBe(jane);
+        expect(judy.status).toBe(ModelStatus.LOAD);
+        expect(jane.status).toBe(ModelStatus.INIT);
+        expect(john.status).toBe(ModelStatus.BIND);
     }
 
 })

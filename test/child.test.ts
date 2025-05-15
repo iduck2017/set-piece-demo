@@ -2,49 +2,49 @@ import { BunnyModel, GenderType } from "./bunny";
 
 test.skip('child', () => {
     
-    const bunny = new BunnyModel({});
-    const bunnyJane = new BunnyModel({
+    const judy = new BunnyModel({});
+    const jane = new BunnyModel({
         state: { name: 'Jane' }
     });
-    const bunnyJohn = new BunnyModel({
+    const john = new BunnyModel({
         state: { name: 'John', gender: GenderType.MALE }
     });
 
-    expect(bunny.child.length).toBe(0);
-    expect(bunny.child[0]).toBeUndefined();
+    expect(judy.child.length).toBe(0);
+    expect(judy.child[0]).toBeUndefined();
     
     spawn: {
-        bunny.spawn(bunnyJane);
-        expect(bunny.child.length).toBe(1);
-        expect(bunny.child[0]).toBe(bunnyJane);
+        judy.spawn(jane);
+        expect(judy.child.length).toBe(1);
+        expect(judy.child[0]).toBe(jane);
     }
 
     spawn: {
-        const result = bunnyJane.spawn(bunnyJohn);
-        expect(result).toBe(bunnyJohn);
-        expect(bunnyJane.child.length).toBe(1);
-        expect(bunnyJane.child[0]).toBe(bunnyJohn);
+        const result = jane.spawn(john);
+        expect(result).toBe(john);
+        expect(jane.child.length).toBe(1);
+        expect(jane.child[0]).toBe(john);
     }
 
     clone: {
-        const result = bunny.spawn(bunnyJane);
-        expect(result).not.toBe(bunnyJane);
-        expect(result.uuid).not.toBe(bunnyJane.uuid);
-        expect(bunny.child[0]).toBe(bunnyJane);
-        expect(bunny.child[1]).toBe(result);
+        const result = judy.spawn(jane);
+        expect(result).not.toBe(jane);
+        expect(result.uuid).not.toBe(jane.uuid);
+        expect(judy.child[0]).toBe(jane);
+        expect(judy.child[1]).toBe(result);
     
         
-        const bunnyJohn2 = bunnyJane.child[0];
+        const bunnyJohn2 = jane.child[0];
         const bunnyJohn3 = result.child[0];
-        expect(bunnyJohn2).toBe(bunnyJohn);
-        expect(bunnyJohn3).not.toBe(bunnyJohn);
+        expect(bunnyJohn2).toBe(john);
+        expect(bunnyJohn3).not.toBe(john);
     }
 
     despawn: {
-        const result = bunnyJane.despawn();
-        expect(result).toBe(bunnyJohn);
-        expect(bunnyJane.child.length).toBe(0);
-        expect(bunnyJane.child[0]).toBeUndefined();
+        const result = jane.despawn();
+        expect(result).toBe(john);
+        expect(jane.child.length).toBe(0);
+        expect(jane.child[0]).toBeUndefined();
     }
 
     
