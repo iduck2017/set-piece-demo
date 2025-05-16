@@ -1,32 +1,52 @@
 import { GenderType } from "@/common"
 import { StaffModel } from "./staff"
 import { IngSocModel } from "./ing-soc"
+import { ModelCycle } from "set-piece";
 
-test('state', () => {
+console.log = () => undefined
+console.group = () => undefined
+console.groupEnd = () => undefined
+
+describe('state', () => {
+    const ingsoc = new IngSocModel();
+    const jones = ingsoc.child.miniluv;
+    const rutherford = ingsoc.child.miniplenty;
     const goldstein = new StaffModel({
         state: {
-            name: "Emmanuel Goldstein",
+            name: 'Emmanuel Goldstein',
+            salary: 200,
+            asset: 8_000,
             gender: GenderType.MALE,
-            salary: 100,
-            money: 1000,
-        },
+        }
     })
 
-    expect(goldstein.state.name).toBe('Emmanuel Goldstein');
-    expect(goldstein.state.salary).toBe(100);
-    expect(goldstein.state.money).toBe(1000);
-    expect(goldstein.state.gender).toBe(GenderType.MALE);
+    let jonesSalary = jones.state.salary;
+    let rutherfordSalary = rutherford.state.salary;
+    let goldsteinSalary = goldstein.state.salary;
 
-    const ingsoc = new IngSocModel();
-    const julia = ingsoc.child.minipax;
+    let goldsteinAsset = goldstein.state.asset;
+    let partyAsset = ingsoc.state.asset;
 
-    expect(julia?.state.name).toBe('Julia');
-    expect(julia?.state.salary).toBe(3);
-    expect(julia?.state.money).toBe(20);
-    expect(julia?.state.gender).toBe(GenderType.FEMALE);
+    test('alter_state', () => {
+        const gift = 100;
+        goldstein._increaseAsset(gift);
+        goldsteinAsset += gift;
+        expect(goldstein.state.asset).toBe(goldsteinAsset);
 
-    julia?._alterMoney(5);
-    expect(julia?.state.money).toBe(25);
+        goldstein._decreaseAsset(gift);
+        goldsteinAsset -= gift;
+        expect(goldstein.state.asset).toBe(goldsteinAsset);
+    })
+
+
+    test('decor_not_load', () => {
+        ingsoc.corrupt();
+    })
+
+    test('decor_load', () => {
+        ModelCycle.boot(ingsoc);
+        expect(ingsoc.state.asset).toBe(partyAsset - 250);
+    })
 
 })
 

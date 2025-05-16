@@ -1,47 +1,183 @@
 import { ModelCycle } from "set-piece";
-import { RootModel } from "./ping-pong"
+import { IngSocModel } from "./ing-soc"
+import { StaffModel } from "./staff";
+import { GenderType } from "@/common";
 
-test.skip('event', () => {
-    const root = ModelCycle.boot(new RootModel({}));
-    expect(root.child.ping.state.value).toBe(0);
-    expect(root.child[0].state.value).toBe(0);
-    expect(root.child[1].state.value).toBe(0);
+console.log = () => undefined
+console.group = () => undefined
+console.groupEnd = () => undefined
 
-    ping: {
-        root.child.ping.ping(3);
-        expect(root.child[0].state.value).toBe(3);
-        expect(root.child[1].state.value).toBe(3);
-    }
+describe('event', () => {
+    const ingsoc = new IngSocModel();
 
-    spawn: {
-        root.spawn();
-        expect(root.child[2].state.value).toBe(0);
-        root.child.ping.ping(2);
-        expect(root.child[0].state.value).toBe(5);
-        expect(root.child[1].state.value).toBe(5);
-        expect(root.child[2].state.value).toBe(2);
-    }
+    const obrien = ingsoc.child.minitrue;
+    const aaronson = ingsoc.child.minipax;
+    const rutherford = ingsoc.child.miniplenty;
+    const jones = ingsoc.child.miniluv;
+    const goldstein = new StaffModel({
+        state: {
+            name: 'Emmanuel Goldstein',
+            salary: 200,
+            asset: 8_000,
+            gender: GenderType.MALE,
+        }
+    })
 
-    pong: {
-        root.child[0].pong();
-        expect(root.child.ping.state.value).toBe(10);
-        root.child[1].pong();
-        expect(root.child.ping.state.value).toBe(11);
-        root.child[2].pong();
-        expect(root.child.ping.state.value).toBe(12);
-    }
+    let partyAsset = ingsoc.state.asset;
 
-    replace: {
-        root.change();
-        root.spawn();
-        expect(root.child[0].state.value).toBe(0);
-        root.child.ping.ping(10);
-        expect(root.child[0].state.value).toBe(10);
-        expect(root.child[1].state.value).toBe(15);
-        expect(root.child[2].state.value).toBe(12);
-        expect(root.child[3].state.value).toBe(10);
-    }
+    let jonesAsset = jones.state.asset;
+    let aaronsonAsset = aaronson.state.asset;
+    let rutherfordAsset = rutherford.state.asset;
+    let obrienAsset = obrien.state.asset;
+    let goldsteinAsset = goldstein.state.asset;
+
+    let jonesSalary = jones.state.salary;
+    let aaronsonSalary = aaronson.state.salary;
+    let rutherfordSalary = rutherford.state.salary;
+    let obrienSalary = obrien.state.salary;
+    let goldsteinSalary = goldstein.state.salary;
 
     
+
+
+    test('event_not_load', () => {
+        jones.work();
+        jonesAsset += 0;
+        partyAsset -= 0;
+        expect(jones.state.asset).toBe(jonesAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+    })
+
+    test('event_load', () => {
+        ModelCycle.boot(ingsoc);
+        jones.work();
+        jonesAsset += jonesSalary;
+        partyAsset -= jonesSalary;
+        expect(jones.state.asset).toBe(jonesAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        jones.work();
+        jonesAsset += jonesSalary;
+        partyAsset -= jonesSalary;
+        expect(jones.state.asset).toBe(jonesAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+    })
+
+
+    test('event_unload', () => {
+        ingsoc.purge(goldstein, jones);
+        expect(ingsoc.child.miniluv).toBe(goldstein);
+        jones.work();
+        jonesAsset += 0;
+        partyAsset -= 0;
+        expect(jones.state.asset).toBe(jonesAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+    })
+
+    test('event_not_reload', () => {
+        goldstein.work();
+        goldsteinAsset += 0;
+        partyAsset -= 0;
+        expect(goldstein.state.asset).toBe(goldsteinAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        ingsoc.purge(jones, goldstein);
+        expect(ingsoc.child.miniluv).toBe(jones);
+        jones.work();
+        jonesAsset += 0;
+        partyAsset -= 0;
+        expect(jones.state.asset).toBe(jonesAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+    })
+
+
+    test('event_auto_reload', () => {
+        ingsoc.purge(goldstein, aaronson);
+        expect(ingsoc.child.minipax).toBe(goldstein);
+        goldstein.work();
+        goldsteinAsset += goldsteinSalary;
+        partyAsset -= goldsteinSalary;
+        expect(goldstein.state.asset).toBe(goldsteinAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        ingsoc.purge(aaronson, goldstein);
+        expect(ingsoc.child.minipax).toBe(aaronson);
+        aaronson.work();
+        aaronsonAsset += aaronsonSalary;
+        partyAsset -= aaronsonSalary;
+        expect(aaronson.state.asset).toBe(aaronsonAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+    })
+
+    test('event_bubble', () => {
+        ingsoc.purge(goldstein, rutherford);
+        expect(ingsoc.child.miniplenty).toBe(goldstein);
+        goldstein.work();
+        goldsteinAsset += goldsteinSalary;
+        partyAsset -= goldsteinSalary;
+        expect(goldstein.state.asset).toBe(goldsteinAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        ingsoc.purge(rutherford, goldstein);
+        expect(ingsoc.child.miniplenty).toBe(rutherford);
+        rutherford.work();
+        rutherfordAsset += rutherfordSalary;
+        partyAsset -= rutherfordSalary;
+        expect(rutherford.state.asset).toBe(rutherfordAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+        
+    })
+
+    
+    const winston = obrien.child[0];
+    const julia = obrien.child[1];
+    const ampleforth = new StaffModel({
+        state: {
+            name: 'Ampleforth',
+            salary: 10,
+            asset: 80,
+        }
+    })
+
+    let winstonAsset = winston.state.asset;
+    let juliaAsset = julia.state.asset;
+    let ampleforthAsset = ampleforth.state.asset;
+
+    let winstonSalary = winston.state.salary;
+    let juliaSalary = julia.state.salary;
+    let ampleforthSalary = ampleforth.state.salary;
+
+    test('event_recurse', () => {
+        obrien.work();
+        obrienAsset += obrienSalary;
+        partyAsset -= obrienSalary;
+        expect(obrien.state.asset).toBe(obrienAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+        expect(obrien.child[0]).toBe(winston);
+        expect(obrien.child[1]).toBe(julia);
+
+        winston.work();
+        winstonAsset += winstonSalary;
+        partyAsset -= winstonSalary;
+        expect(winston.state.asset).toBe(winstonAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        julia.work();
+        juliaAsset += juliaSalary;
+        partyAsset -= juliaSalary;
+        expect(julia.state.asset).toBe(juliaAsset);
+        expect(ingsoc.state.asset).toBe(partyAsset);
+
+        obrien.replace(ampleforth, winston);
+        expect(obrien.child[0]).toBe(ampleforth);
+        expect(obrien.child[1]).toBe(julia);
+        ampleforth.work();
+        ampleforthAsset += ampleforthSalary;
+        partyAsset -= ampleforthSalary;
+        expect(ingsoc.state.asset).toBe(partyAsset);
+        expect(ampleforth.state.asset).toBe(ampleforthAsset);
+    })
+
+
 
 })
