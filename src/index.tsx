@@ -2,11 +2,14 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { DebugService, Model, ModelCycle } from "set-piece";
 import { RootModel } from "./root";
+import { IngSocModel } from "./ing-soc";
+import { StaffModel } from "./staff";
+import { GenderType } from "./common";
 
 export class AppService {
     private static _rootView?: HTMLElement;
     
-    private static _rootModel?: RootModel;
+    private static _rootModel?: IngSocModel;
     public static get rootModel() {
         return AppService._rootModel;
     }
@@ -14,7 +17,7 @@ export class AppService {
     private constructor() {}
 
     static async boot() {
-        AppService._rootModel = ModelCycle.boot(new RootModel({}));
+        AppService._rootModel = ModelCycle.boot(new IngSocModel({}));
         window.app = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
@@ -23,29 +26,25 @@ export class AppService {
 
     @DebugService.log()
     static test() {
-        if (!AppService._rootModel) return;
-        const root = AppService._rootModel;
-        console.log(root.proxy.event.onPing);
-        console.log(root.proxy.decor.count);
-        console.log(root.proxy.child.boss.event.onHello);
-        console.log(root.proxy.child.boss.decor.level);
-        console.log(root.proxy.child.boss.child.vice?.event.onHello)
-        console.log(root.proxy.child.boss.child[0].decor.name);
-
-        console.log('count:', root.state.count)
-        console.log('name:', root.state.name)
-        console.log('child:', root.child.boss.uuid);
-
-        root.child.boss.recruit();
-        root.child.boss.recruit();
-        root.ping();
-
-        root.child.boss.connect();
-
-        root.child.boss.dismiss();
-        console.log('refer:', root.child.boss.refer)
-
-        root.ping();
+        const ingsoc = AppService._rootModel;
+        if (!ingsoc) return;
+        const goldstein = new StaffModel({
+            state: {
+                name: 'Emmanuel Goldstein',
+                salary: 200,
+                asset: 8_000,
+                gender: GenderType.MALE,
+            }
+        })
+        const winston = ingsoc.child.minitrue.child[0];
+        const julia = ingsoc.child.minitrue.child[1];
+        const obrien = ingsoc.child.minitrue;
+        const aaronson = ingsoc.child.minipax;
+        ingsoc.depress(true);
+        console.log(winston?.state.salary);
+        console.log(julia?.state.salary);
+        console.log(obrien.state.salary);
+        console.log(aaronson.state.salary);
     }
 }
 

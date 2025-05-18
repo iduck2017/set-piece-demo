@@ -1,87 +1,108 @@
-import { DebugService, EventAgent, Model, StateAgent } from "set-piece";
-import { RootModel } from "./root";
-import { GenderType } from "./common";
+import { GenderType } from "@/common";
+import { DebugService, EventAgent, Model, OnStateChange, StateAgent, TranxService } from "set-piece";
+import { IngSocModel } from "./ing-soc";
+import { PetModel } from "./pet";
+import { Refer } from "set-piece/dist/type/types/refer";
+import { PromotionModel } from "./feature/promotion";
+import { FeatureGroupModel } from "./feature";
 
 export namespace StaffDefine {
-    export type E = { onHello: number }
-    export type S1 = { name: string, level: number }
-    export type S2 = { age: number, gender: GenderType }
-    export type P = StaffModel | RootModel
-    export type C1 = { vice?: StaffModel }
-    export type C2 = StaffModel
-    export type R1 = { spouse: StaffModel }
-    export type R2 = { friends: StaffModel[], family: StaffModel[] }
+    export type P = IngSocModel | StaffModel;
+    export type E = { onWork: StaffModel, onEarn: StaffModel };
+    export type S1 = { salary: number; asset: number, _salary: number };
+    export type S2 = { name: string; gender: GenderType; }
+    export type C1 = { pet?: PetModel, features: FeatureGroupModel };
+    export type C2 = StaffModel;
+    export type R1 = { spouse: StaffModel };
+    export type R2 = { friends: StaffModel, offspring: StaffModel };
 }
 
 export class StaffModel extends Model<
+    StaffDefine.P,
     StaffDefine.E,
     StaffDefine.S1,
     StaffDefine.S2,
-    StaffDefine.P,
     StaffDefine.C1,
     StaffDefine.C2,
     StaffDefine.R1,
     StaffDefine.R2
 > {
-    constructor(props: Model.Props<StaffModel>) {
+    constructor(props?: Model.Props<StaffModel>) {
         super({
             ...props,
             state: { 
-                name: "john doe", 
-                level: 1, 
-                age: 18,
-                gender: GenderType.MALE,
-                ...props.state
+                name: 'John Doe', 
+                gender: GenderType.MALE, 
+                salary: 3000, 
+                asset: 0, 
+                ...props?.state, 
+                _salary: 0, 
             },
-            child: {
-                ...props.child,
-            }
+            child: { 
+                features: new FeatureGroupModel(),
+                ...props?.child 
+            },
         })
     }
 
-    public get root() {
-        let parent: Model | undefined = this;
-        while (!(parent instanceof RootModel)) {
-            if (!parent) return;
-            parent = parent.parent;
+    @TranxService.span()
+    public _decreaseAsset(value: number) {
+        this.draft.state.asset -= value;
+        if (this.draft.state.asset < 0) {
+            value = this.draft.state.asset;
+            this.draft.state.asset = 0;
         }
-        return parent;
+        return value;
+    }
+
+    public get name() {
+        return this.state.name;
+    }
+
+    @TranxService.span()
+    public _increaseAsset(value: number) {
+        this.draft.state.asset += value;
+    }
+
+    public work() {
+        this.event.onWork(this);
+    }
+
+    public promote() {
+        const promotion = new PromotionModel();
+        this.child.features.append(promotion);
+    }
+
+    @EventAgent.use((model) => model.proxy.child[0].event.onWork)
+    private _handleWork(target: StaffModel, event: StaffModel) {
+        this.event.onWork(event);
     }
     
-
-    @StateAgent.use(model => model.root?.proxy.decor.count)
-    public checkCount(target: RootModel, state: number) {
-        return state + 1;
+    @StateAgent.use((model) => model.proxy.decor.salary)
+    @StateAgent.use((model) => model.proxy.child[0].decor._salary)
+    private _checkSalary(target: StaffModel, state: number) {
+        return state + this.state._salary;
     }
 
-    @EventAgent.use(model => model.root?.proxy.event.onPing)
-    public handlePing(target: RootModel, event: string) {
-        console.log('pong', event);
-    }
-
-    @DebugService.log()
-    public recruit() {
-        const staff = new StaffModel({});
-        this.draft.child.push(staff);
-        console.log('count:', this.root?.state.count);
-        console.log('size:', this.child.length);
-        return staff;
+    @EventAgent.use((model) => model.proxy.event.onStateChange)
+    private _checkSalaryChange(target: StaffModel, event: OnStateChange<StaffModel>) {
+        if (event.prev._salary !== event.next._salary) {
+            this._reload()
+        }
     }
 
 
-    @DebugService.log()
-    public dismiss() {
-        const staff = this.draft.child.pop();
-        console.log('count:', this.root?.state.count);
-        console.log('size:', this.child.length);
-        return staff;
+    public replace(next: StaffModel, prev: StaffModel) {
+        for (let index = 0; index < this.draft.child.length; index++) {
+            if (this.draft.child[index] === prev) {
+                this.draft.child[index] = next;
+                return next;
+            }
+        }
+        return undefined;
     }
 
-    @DebugService.log()
-    public connect() {
-        console.log('refer:', this.refer);
-        this.draft.refer.family = [ ...this.child ];
-        console.log('refer:', this.refer);
-    }
-    
+
+    declare public draft: Readonly<{ child: StaffDefine.C1 & (StaffModel | undefined)[]; state: StaffDefine.S1 & StaffDefine.S2; refer: Refer<StaffDefine.R1, StaffDefine.R2>; }>;
+   
 }

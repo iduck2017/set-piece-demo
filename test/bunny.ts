@@ -7,21 +7,21 @@ export enum GenderType {
 }
 
 export namespace BunnyDefine {
+    export type P = BunnyModel;
     export type E = { onRun: number };
     export type S1 = { speed: number };
     export type S2 = { isAlive: boolean, readonly name: string, gender: GenderType };
-    export type P = BunnyModel;
     export type C1 = { mate?: BunnyModel };
     export type C2 = BunnyModel
     export type R1 = { ancestor: BunnyModel };
-    export type R2 = { relatives: BunnyModel[] };
+    export type R2 = { relatives: BunnyModel };
 }
 
 export class BunnyModel extends Model<
+    BunnyDefine.P,
     BunnyDefine.E,
     BunnyDefine.S1,
     BunnyDefine.S2,
-    BunnyDefine.P,
     BunnyDefine.C1,
     BunnyDefine.C2,
     BunnyDefine.R1,

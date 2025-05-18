@@ -1,50 +1,41 @@
 import { Define, EventAgent, Model, StrictProps } from "set-piece";
 import { EmotionType, GenderType } from "./common";
-import { FeatureModel } from "./feature";
+import { StaffModel } from "./staff";
 
 export namespace AnimalDefine {
-    export type E = { onEat: AnimalModel }
+    export type P = Model;
+    export type E = { onEat: void }
     export type S1 = { emotion: EmotionType }
     export type S2 = { gender: GenderType, isAlive: boolean }
-    export type P = AnimalModel;
-    export type C1 = { 
-        swim?: FeatureModel,
-        fly?: FeatureModel,
-        run: FeatureModel,
-        hunt?: FeatureModel,
-    }
-    export type C2 = AnimalModel
-    export type R1 = { }
-    export type R2 = { mates: AnimalModel[] }
+    export type C1 = {}
+    export type C2 = Model
+    export type R1 = {}
+    export type R2 = { spouse: AnimalModel, offspring: AnimalModel }
 }
 
-
 export abstract class AnimalModel<
+    P extends AnimalDefine.P = AnimalDefine.P,
     E extends Define.E & Partial<AnimalDefine.E> = {},
     S1 extends Define.S1 & Partial<AnimalDefine.S1> = {},
     S2 extends Define.S2 & Partial<AnimalDefine.S2> = {},
-    P extends AnimalDefine.P = AnimalDefine.P,
     C1 extends Define.C1 & Partial<AnimalDefine.C1> = {},
     C2 extends AnimalDefine.C2 = AnimalDefine.C2,
     R1 extends Define.R1 & Partial<AnimalDefine.R1> = {},
-    R2 extends Define.R2 & Partial<AnimalDefine.R2> = {}
+    R2 extends Define.R2 & AnimalDefine.R2 = AnimalDefine.R2
 > extends Model<
+    P,
     E & AnimalDefine.E, 
     S1 & AnimalDefine.S1, 
     S2 & AnimalDefine.S2, 
-    P,
     C1 & AnimalDefine.C1, 
     C2, 
     R1 & AnimalDefine.R1, 
-    R2 & AnimalDefine.R2
+    R2
 > {
     private _test() {
         const gender: GenderType = this.state.gender;
         const emotion: EmotionType = this.state.emotion;
-        const swim: FeatureModel | undefined = this.child.swim
-        const child: AnimalModel = this.child[0]
-        const mates: AnimalModel[] | undefined = this.refer.mates;
-        this.event.onEat(this.child[0]);
+        this.refer.spouse
     }
 
     constructor(props: 
@@ -59,19 +50,8 @@ export abstract class AnimalModel<
                 gender: GenderType.UNKNOWN,
                 ...props.state,
             },
-            child: {
-                run: new FeatureModel({}),
-                ...props.child,
-            }
+            child: { ...props.child }
         })
-    }
- 
-    @EventAgent.use(model => {
-        const child: Model.Proxy<AnimalModel> = model.proxy.child[0]
-        return child.event.onEat
-    })
-    private handleEat(target: AnimalModel, food: AnimalModel) {
-        console.log("eat", target, food);
     }
 }
 

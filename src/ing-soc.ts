@@ -1,20 +1,21 @@
 import { DebugService, EventAgent, Model, OnChildChange, TranxService } from "set-piece";
 import { StaffModel } from "./staff";
 import { GenderType } from "@/common";
-import { CorruptionModel, DepressionModel } from "./incident";
+import { IncidentGroupModel } from "./incident";
+import { DepressionModel } from "./incident/depression";
+import { CorruptionModel } from "./incident/corruption";
 
-export namespace CorpDefine {
+export namespace IngSocDefine {
+    export type P = never;
     export type E = {};
     export type S1 = { asset: number };
     export type S2 = { name: string };
-    export type P = never;
     export type C1 = {
         minipax: StaffModel;
         miniplenty: StaffModel;
         miniluv: StaffModel;
         minitrue: StaffModel;
-        depression?: DepressionModel;
-        corruption?: CorruptionModel;
+        incidents: IncidentGroupModel
     }
     export type C2 = StaffModel
     export type R1 = {}
@@ -22,14 +23,14 @@ export namespace CorpDefine {
 }
 
 export class IngSocModel extends Model<
-    CorpDefine.E,
-    CorpDefine.S1,
-    CorpDefine.S2,
-    CorpDefine.P,
-    CorpDefine.C1,
-    CorpDefine.C2,
-    CorpDefine.R1,
-    CorpDefine.R2
+    IngSocDefine.P,
+    IngSocDefine.E,
+    IngSocDefine.S1,
+    IngSocDefine.S2,
+    IngSocDefine.C1,
+    IngSocDefine.C2,
+    IngSocDefine.R1,
+    IngSocDefine.R2
 > {
     constructor(props?: Model.Props<IngSocModel>) {
         super({
@@ -40,6 +41,7 @@ export class IngSocModel extends Model<
                 ...props?.state 
             },
             child: { 
+                incidents: new IncidentGroupModel(),
                 minitrue: new StaffModel({ 
                     state: { 
                         name: 'O\'Brien',
@@ -95,6 +97,7 @@ export class IngSocModel extends Model<
         })
     }
 
+    @DebugService.log()
     public purge(next: StaffModel, prev: StaffModel) {
         for (const key in this.draft.child) {
             if (this.draft.child[key] === prev) {
@@ -130,15 +133,31 @@ export class IngSocModel extends Model<
         this.draft.state.asset += value;
     }
 
-    public depress() {
-        const depression = new DepressionModel();
-        this.draft.child.depression = depression;
+    @DebugService.log()
+    public depress(flag: boolean) {
+        let depression = this.child.incidents.child.find(item => item instanceof DepressionModel);
+        if (flag) {
+            if (depression) return;
+            depression = new DepressionModel();
+            this.child.incidents.append(depression);
+        } else {
+            if (!depression) return;
+            this.child.incidents.remove(depression);
+        }
     }
 
 
-    public corrupt() {
-        const corruption = new CorruptionModel();
-        this.draft.child.corruption = corruption;
+    @DebugService.log()
+    public corrupt(flag: boolean) {
+        let corruption = this.child.incidents.child.find(item => item instanceof CorruptionModel);
+        if (flag) {
+            if (corruption) return;
+            corruption = new CorruptionModel();
+            this.child.incidents.append(corruption);
+        } else {
+            if (!corruption) return;
+            this.child.incidents.remove(corruption);
+        }
     }
 
     @EventAgent.use((model) => model.proxy.event.onChildChange)

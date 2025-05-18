@@ -10,10 +10,10 @@ export namespace PingDefine {
 }
 
 export class PingModel extends Model<
+    PingDefine.P,
     PingDefine.E,
     PingDefine.S1,
     PingDefine.S2,
-    PingDefine.P,
     PingDefine.C1,
     PingDefine.C2
 > {
@@ -47,6 +47,7 @@ export class PingModel extends Model<
         console.log('handle pong plus', this.draft.state.value);
         this.draft.state.value += 9;
     }
+
 }
 
 
@@ -59,14 +60,14 @@ export namespace PongDefine {
     export type C1 = {};
     export type C2 = never;
     export type R1 = { friend: PongModel };
-    export type R2 = { friends: PongModel[] };
+    export type R2 = { friends: PongModel };
 }
 
 export class PongModel extends Model<
+    PongDefine.P,
     PongDefine.E,
     PongDefine.S1,
     PongDefine.S2,
-    PongDefine.P,
     PongDefine.C1,
     PongDefine.C2,
     PongDefine.R1,
@@ -120,10 +121,10 @@ export namespace RootDefine {
 
 
 export class RootModel extends Model<
+    RootDefine.P,
     RootDefine.E,
     RootDefine.S1,
     RootDefine.S2,
-    RootDefine.P,
     RootDefine.C1,
     RootDefine.C2
 > {

@@ -1,6 +1,6 @@
 import { ModelCycle } from "set-piece";
-import { IngSocModel } from "./ing-soc"
-import { StaffModel } from "./staff";
+import { IngSocModel } from "../src/ing-soc"
+import { StaffModel } from "../src/staff";
 import { GenderType } from "@/common";
 
 console.log = () => undefined
@@ -36,8 +36,6 @@ describe('event', () => {
     let rutherfordSalary = rutherford.state.salary;
     let obrienSalary = obrien.state.salary;
     let goldsteinSalary = goldstein.state.salary;
-
-    
 
 
     test('event_not_load', () => {
@@ -139,6 +137,16 @@ describe('event', () => {
         }
     })
 
+
+    test('precheck', () => {
+        expect(winston).toBeDefined();
+        expect(julia).toBeDefined();
+        expect(ampleforth).toBeDefined();
+    })
+
+    if (!winston || !julia || !ampleforth) {
+        return;
+    }
     let winstonAsset = winston.state.asset;
     let juliaAsset = julia.state.asset;
     let ampleforthAsset = ampleforth.state.asset;

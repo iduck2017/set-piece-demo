@@ -2,22 +2,22 @@ import { Model, StateAgent, EventAgent, StoreService, DebugService } from "set-p
 import { StaffModel } from "./staff";
 
 export namespace RootDefine {
+    export type P = never;
     export type E = { onPing: string }
     export type S1 = { count: number };
     export type S2 = { name: string };
-    export type P = never;
     export type C1 = { boss: StaffModel };
     export type C2 = never;
     export type R1 = { duty: StaffModel };
-    export type R2 = { backup: StaffModel[] };
+    export type R2 = { backup: StaffModel };
 }
 
 @StoreService.is('root')
 export class RootModel extends Model<
+    RootDefine.P,
     RootDefine.E,
     RootDefine.S1,
     RootDefine.S2,
-    RootDefine.P,
     RootDefine.C1,
     RootDefine.C2,
     RootDefine.R1,
@@ -57,9 +57,6 @@ export class RootModel extends Model<
         console.log('count:', this.state.count, this.draft.state.count);
         this.event.onPing('hello')
     }
-    
-
-
 
 
 }
