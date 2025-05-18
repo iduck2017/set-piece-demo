@@ -10,7 +10,7 @@ export namespace PetDefine {
     export type S2 = { name: string, isRare: boolean };
     export type C1 = {}
     export type C2 = PetModel
-    export type R1 = {  }
+    export type R1 = { }
     export type R2 = { friends: PetModel, spouse: PetModel, offspring: PetModel }
 }
 

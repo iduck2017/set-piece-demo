@@ -9,7 +9,7 @@ export namespace AnimalDefine {
     export type S2 = { gender: GenderType, isAlive: boolean }
     export type C1 = {}
     export type C2 = Model
-    export type R1 = {}
+    export type R1 = { spouse: never }
     export type R2 = { spouse: AnimalModel, offspring: AnimalModel }
 }
 
@@ -20,8 +20,8 @@ export abstract class AnimalModel<
     S2 extends Define.S2 & Partial<AnimalDefine.S2> = {},
     C1 extends Define.C1 & Partial<AnimalDefine.C1> = {},
     C2 extends AnimalDefine.C2 = AnimalDefine.C2,
-    R1 extends Define.R1 & Partial<AnimalDefine.R1> = {},
-    R2 extends Define.R2 & AnimalDefine.R2 = AnimalDefine.R2
+    R1 extends Define.R1 & AnimalDefine.R1 = AnimalDefine.R1,
+    R2 extends Define.R2 & AnimalDefine.R2 = AnimalDefine.R2,
 > extends Model<
     P,
     E & AnimalDefine.E, 
@@ -30,12 +30,14 @@ export abstract class AnimalModel<
     C1 & AnimalDefine.C1, 
     C2, 
     R1 & AnimalDefine.R1, 
-    R2
+    R2,
 > {
     private _test() {
         const gender: GenderType = this.state.gender;
         const emotion: EmotionType = this.state.emotion;
-        this.refer.spouse
+        const spouse: AnimalModel[] | undefined = this.refer.spouse;
+        const foo: AnimalModel[] | undefined = this.refer2.foo;
+        const bar: AnimalModel | undefined = this.refer2.bar;
     }
 
     constructor(props: 
