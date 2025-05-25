@@ -49,7 +49,6 @@ export class StaffModel extends Model<
     debug() {
         console.log(this.agent.route.path);
         console.log(this.agent.route.key);
-        console.log(this.agent.route.parent)
     }
 
     // @TranxService.span()
@@ -60,10 +59,6 @@ export class StaffModel extends Model<
     //         this.draft.state.asset = 0;
     //     }
     //     return value;
-    // }
-
-    // public get name() {
-    //     return this.state.name;
     // }
 
     // @TranxService.span()

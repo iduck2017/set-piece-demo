@@ -30,23 +30,22 @@ export class AppService {
         ingsoc.cost();
         const winston = ingsoc.child.minitrue.child.subordinates[0];
         const obrien = ingsoc.child.minitrue;
+        const aaronson = ingsoc.child.minipax;
+        const goldstein = new StaffModel({
+            state: {
+                name: 'Emmanuel Goldstein',
+                salary: 200,
+                asset: 8_000,
+                gender: GenderType.MALE,
+            }
+        })
         if (!winston) return;
         winston.debug();
         obrien.debug();
-
-        // if (!ingsoc) return;
-        // const goldstein = new StaffModel({
-        //     state: {
-        //         name: 'Emmanuel Goldstein',
-        //         salary: 200,
-        //         asset: 8_000,
-        //         gender: GenderType.MALE,
-        //     }
-        // })
-        // const winston = ingsoc.child.minitrue.child.subordinates[0];
-        // const julia = ingsoc.child.minitrue.child.subordinates[1];
-        // const obrien = ingsoc.child.minitrue;
-        // const aaronson = ingsoc.child.minipax;
+        goldstein.debug();
+        ingsoc.purge(goldstein, aaronson);
+        ingsoc.corrupt(true);
+        ingsoc.purge(aaronson, goldstein);
         // ingsoc.depress(true);
         // console.log(winston?.state.salary);
         // console.log(julia?.state.salary);

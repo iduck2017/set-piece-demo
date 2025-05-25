@@ -109,24 +109,25 @@ export class IngSocModel extends Model<
         console.log(this.draft.state.asset)
     }
 
-    @StateAgent.use((model) => model.proxy.decor.asset)
-    @DebugService.log()
-    private checkAsset(target: IngSocModel, asset: number) {
-        console.log('check asset')
-        return asset + 100;
-    }
-
-    
-
+    // @StateAgent.use((model) => model.proxy.decor.asset)
     // @DebugService.log()
-    // public purge(next: StaffModel, prev: StaffModel) {
-    //     // for (const key in this.draft.child) {
-    //     //     if (this.draft.child[key] === prev) {
-    //     //         this.draft.child[key] = next;
-    //     //         return;
-    //     //     }
-    //     // }
+    // private checkAsset(target: IngSocModel, asset: number) {
+    //     console.log('check asset')
+    //     return asset + 100;
     // }
+
+
+    @DebugService.log()
+    public purge(next: StaffModel, prev: StaffModel) {
+        if (this.draft.child.miniluv === prev) this.draft.child.miniluv = next;
+        if (this.draft.child.minitrue === prev)  this.draft.child.minitrue = next;
+        if (this.draft.child.miniplenty === prev) this.draft.child.miniplenty = next;
+        if (this.draft.child.minipax === prev) {
+            console.log('minipax', this.child.minipax.state.name);
+            this.draft.child.minipax = next
+            console.log('minipax', this.child.minipax.state.name);
+        };
+    }
 
     // @EventAgent.use((model) => model.proxy.child.minitrue.event.onWork)
     // @EventAgent.use((model) => model.proxy.child.miniplenty.event.onWork)
@@ -154,38 +155,42 @@ export class IngSocModel extends Model<
     //     this.draft.state.asset += value;
     // }
 
-    // @DebugService.log()
-    // public depress(flag: boolean) {
-    //     // let depression = this.draft.child.incidents.find(item => item instanceof DepressionModel);
-    //     // if (flag) {
-    //     //     if (depression) return;
-    //     //     depression = new DepressionModel();
-    //     //     this.draft.child.incidents.push(depression);
-    //     // } else {
-    //     //     if (!depression) return;
-    //     //     const index = this.draft.child.incidents.indexOf(depression);
-    //     //     if (index === -1) return;
-    //     //     this.draft.child.incidents.splice(index, 1);
-    //     // }
-    // }
+    @DebugService.log()
+    public depress(flag: boolean) {
+        console.log(this.draft.child.incidents.length)
+        let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
+        if (flag) {
+            if (index !== -1) return;
+            this.draft.child.incidents.push(new DepressionModel());
+        } else {
+            if (index === -1) return;
+            this.draft.child.incidents.splice(index, 1);
+        }
+        console.log(this.draft.child.incidents.length)
+        console.log(this.draft.state.asset)
+        console.log(this.state.asset)
+    }
 
 
-    // @DebugService.log()
-    // public corrupt(flag: boolean) {
-    //     // let corruption = this.draft.child.incidents.find(item => item instanceof CorruptionModel);
-    //     // if (flag) {
-    //     //     if (corruption) return;
-    //     //     corruption = new CorruptionModel();
-    //     //     this.child.incidents.append(corruption);
-    //     // } else {
-    //     //     if (!corruption) return;
-    //     //     this.child.incidents.remove(corruption);
-    //     // }
-    // }
+    @DebugService.log()
+    public corrupt(flag: boolean) {
+        console.log(this.draft.child.incidents)
+        let index = this.draft.child.incidents.findIndex(item => item instanceof CorruptionModel);
+        if (flag) {
+            if (index !== -1) return;
+            this.draft.child.incidents.push(new CorruptionModel());
+        } else {
+            if (index === -1) return;
+            this.draft.child.incidents.splice(index, 1);
+        }
+        console.log(this.draft.child.incidents.length)
+        console.log(this.draft.state.asset)
+        console.log(this.state.asset)
+    }
 
     // @EventAgent.use((model) => model.proxy.event.onChildChange)
     // @DebugService.log()
-    // private _handleChildChange(target: IngSocModel, event: OnChildChange<IngSocModel>) {
+    // private handleChildChange(target: IngSocModel, event: OnChildChange<IngSocModel>) {
     //     if (event.prev.minipax !== event.next.minipax) {
     //         console.log(this, this.constructor.name)
     //         this.reload();
