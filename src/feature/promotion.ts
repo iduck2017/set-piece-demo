@@ -11,7 +11,7 @@ export class PromotionModel extends FeatureModel {
         })
     }
 
-    @StateAgent.use(model => model.self?.proxy.decor.salary)
+    @StateAgent.use(model => model.parent?.proxy.decor.salary)
     private _checkSalary(target: StaffModel, state: number) {
         return state + 1;
     }

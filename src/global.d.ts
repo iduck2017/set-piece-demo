@@ -1,5 +1,5 @@
 import { AppService } from ".";
-import { RootModel } from "./root";
+import { IngSocModel } from "./ing-soc";
 
 declare module '*.scss' {
     const content: { [className: string]: string };
@@ -8,7 +8,7 @@ declare module '*.scss' {
 
 declare global {
     interface Window {
-        app: AppService;
-        root: RootModel;
+        app: AppService | undefined;
+        root: IngSocModel | undefined;
     }
 }

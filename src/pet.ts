@@ -1,4 +1,4 @@
-import { Define, Model, StateAgent, StrictProps } from "set-piece";
+import { Model, StateAgent } from "set-piece";
 import { AnimalDefine, AnimalModel } from "./animal";
 import { StaffModel } from "./staff";
 import { EmotionType, GenderType } from "./common";
@@ -9,7 +9,7 @@ export namespace PetDefine {
     export type S1 = { price: number };
     export type S2 = { name: string, isRare: boolean };
     export type C1 = {}
-    export type C2 = PetModel
+    export type C2 = {}
     export type R1 = { }
     export type R2 = { friends: PetModel, spouse: PetModel, offspring: PetModel }
 }
@@ -30,7 +30,6 @@ export class PetModel extends AnimalModel<
         const friends: readonly PetModel[] | undefined = this.refer.friends;
         const parent: StaffModel | undefined = this.parent;
         const emotion: EmotionType = this.state.emotion;
-        const child: PetModel | undefined = this.child[0];
         const gender: GenderType = this.state.gender;
         this.refer.spouse
     }
@@ -48,6 +47,9 @@ export class PetModel extends AnimalModel<
                 name: '',
                 isRare: false,
                 price: 0,
+                emotion: EmotionType.NEUTRAL,
+                gender: GenderType.UNKNOWN,
+                isAlive: true,
                 ...props.state,
             },
             child: { ...props.child }

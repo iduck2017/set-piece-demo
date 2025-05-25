@@ -12,6 +12,7 @@
       "strict": true,
       "experimentalDecorators": true,
       "strictFunctionTypes": false,
+      "noUncheckedIndexedAccess": true,
       "paths": {
         "@/*": ["./src/*"]
       },

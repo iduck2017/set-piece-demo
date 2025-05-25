@@ -24,10 +24,10 @@ export class DepressionModel extends IncidentModel<
         })
     }
     
-    @StateAgent.use((model) => model.root?.proxy.child.miniplenty.decor._salary)
-    @StateAgent.use((model) => model.root?.proxy.child.minitrue.decor._salary)
-    @StateAgent.use((model) => model.root?.proxy.child.minipax.decor._salary)
-    @StateAgent.use((model) => model.root?.proxy.child.miniluv.decor._salary)
+    @StateAgent.use((model) => model.parent?.proxy.child.miniplenty.decor._salary)
+    @StateAgent.use((model) => model.parent?.proxy.child.minitrue.decor._salary)
+    @StateAgent.use((model) => model.parent?.proxy.child.minipax.decor._salary)
+    @StateAgent.use((model) => model.parent?.proxy.child.miniluv.decor._salary)
     private _checkSalary(target: StaffModel, state: number) {
         return state - this.state.level;
     }

@@ -1,9 +1,9 @@
-import { DebugService, EventAgent, Model, OnChildChange, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnChildChange, StateAgent, TranxService } from "set-piece";
 import { StaffModel } from "./staff";
 import { GenderType } from "@/common";
-import { IncidentGroupModel } from "./incident";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
+import { IncidentModel } from "./incident";
 
 export namespace IngSocDefine {
     export type P = never;
@@ -15,9 +15,10 @@ export namespace IngSocDefine {
         miniplenty: StaffModel;
         miniluv: StaffModel;
         minitrue: StaffModel;
-        incidents: IncidentGroupModel
     }
-    export type C2 = StaffModel
+    export type C2 = {
+        incidents: IncidentModel;
+    }
     export type R1 = {}
     export type R2 = {}
 }
@@ -41,7 +42,7 @@ export class IngSocModel extends Model<
                 ...props?.state 
             },
             child: { 
-                incidents: new IncidentGroupModel(),
+                incidents: [],
                 minitrue: new StaffModel({ 
                     state: { 
                         name: 'O\'Brien',
@@ -50,22 +51,24 @@ export class IngSocModel extends Model<
                         gender: GenderType.MALE,
                     },
                     child: {
-                        [0]: new StaffModel({
-                            state: {
-                                name: 'Winston Smith',
-                                salary: 15,
-                                asset: 100,
-                                gender: GenderType.MALE,
-                            },
-                        }),
-                        [1]: new StaffModel({
-                            state: {
-                                name: 'Julia',
-                                salary: 10,
-                                asset: 20,
-                                gender: GenderType.FEMALE,
-                            }
-                        })
+                        subordinates: [
+                            new StaffModel({
+                                state: {
+                                    name: 'Winston Smith',
+                                    salary: 15,
+                                    asset: 100,
+                                    gender: GenderType.MALE,
+                                },
+                            }),
+                            new StaffModel({
+                                state: {
+                                    name: 'Julia',
+                                    salary: 10,
+                                    asset: 20,
+                                    gender: GenderType.FEMALE,
+                                }
+                            })
+                        ] 
                     }
                 }),
                 minipax: new StaffModel({ 
@@ -98,76 +101,96 @@ export class IngSocModel extends Model<
     }
 
     @DebugService.log()
-    public purge(next: StaffModel, prev: StaffModel) {
-        for (const key in this.draft.child) {
-            if (this.draft.child[key] === prev) {
-                this.draft.child[key] = next;
-                return;
-            }
-        }
+    public cost() {
+        console.log(this.state.asset)
+        console.log(this.draft.state.asset)
+        this.draft.state.asset -= 100;
+        console.log(this.state.asset)
+        console.log(this.draft.state.asset)
     }
 
-    @EventAgent.use((model) => model.proxy.child.minitrue.event.onWork)
-    @EventAgent.use((model) => model.proxy.child.miniplenty.event.onWork)
-    @EventAgent.use((model) => model.child.minipax?.proxy.event.onWork)
-    @EventAgent.use((model) => model.child.miniluv?.proxy.event.onWork)
-    @TranxService.span()
-    private _handleWork(target: StaffModel, event: StaffModel) {
-        const salary = event.state.salary;
-        const value = this._decreaseAsset(salary);
-        event._increaseAsset(value);
-    }
-
-    @TranxService.span()
-    public _decreaseAsset(value: number) {
-        this.draft.state.asset -= value;
-        if (this.draft.state.asset < 0) {
-            value = this.draft.state.asset;
-            this.draft.state.asset = 0;
-        }
-        return value;
-    }
-
-    @TranxService.span()
-    public _increaseAsset(value: number) {
-        this.draft.state.asset += value;
-    }
-
+    @StateAgent.use((model) => model.proxy.decor.asset)
     @DebugService.log()
-    public depress(flag: boolean) {
-        let depression = this.child.incidents.child.find(item => item instanceof DepressionModel);
-        if (flag) {
-            if (depression) return;
-            depression = new DepressionModel();
-            this.child.incidents.append(depression);
-        } else {
-            if (!depression) return;
-            this.child.incidents.remove(depression);
-        }
+    private checkAsset(target: IngSocModel, asset: number) {
+        console.log('check asset')
+        return asset + 100;
     }
 
+    
 
-    @DebugService.log()
-    public corrupt(flag: boolean) {
-        let corruption = this.child.incidents.child.find(item => item instanceof CorruptionModel);
-        if (flag) {
-            if (corruption) return;
-            corruption = new CorruptionModel();
-            this.child.incidents.append(corruption);
-        } else {
-            if (!corruption) return;
-            this.child.incidents.remove(corruption);
-        }
-    }
+    // @DebugService.log()
+    // public purge(next: StaffModel, prev: StaffModel) {
+    //     // for (const key in this.draft.child) {
+    //     //     if (this.draft.child[key] === prev) {
+    //     //         this.draft.child[key] = next;
+    //     //         return;
+    //     //     }
+    //     // }
+    // }
 
-    @EventAgent.use((model) => model.proxy.event.onChildChange)
-    @DebugService.log()
-    private _handleChildChange(target: IngSocModel, event: OnChildChange<IngSocModel>) {
-        if (event.prev.minipax !== event.next.minipax) {
-            console.log(this, this.constructor.name)
-            this._reload();
-        }
-    }
+    // @EventAgent.use((model) => model.proxy.child.minitrue.event.onWork)
+    // @EventAgent.use((model) => model.proxy.child.miniplenty.event.onWork)
+    // @EventAgent.use((model) => model.child.minipax?.proxy.event.onWork)
+    // @EventAgent.use((model) => model.child.miniluv?.proxy.event.onWork)
+    // @TranxService.span()
+    // private _handleWork(target: StaffModel, event: StaffModel) {
+    //     const salary = event.state.salary;
+    //     const value = this._decreaseAsset(salary);
+    //     event._increaseAsset(value);
+    // }
+
+    // @TranxService.span()
+    // public _decreaseAsset(value: number) {
+    //     this.draft.state.asset -= value;
+    //     if (this.draft.state.asset < 0) {
+    //         value = this.draft.state.asset;
+    //         this.draft.state.asset = 0;
+    //     }
+    //     return value;
+    // }
+
+    // @TranxService.span()
+    // public _increaseAsset(value: number) {
+    //     this.draft.state.asset += value;
+    // }
+
+    // @DebugService.log()
+    // public depress(flag: boolean) {
+    //     // let depression = this.draft.child.incidents.find(item => item instanceof DepressionModel);
+    //     // if (flag) {
+    //     //     if (depression) return;
+    //     //     depression = new DepressionModel();
+    //     //     this.draft.child.incidents.push(depression);
+    //     // } else {
+    //     //     if (!depression) return;
+    //     //     const index = this.draft.child.incidents.indexOf(depression);
+    //     //     if (index === -1) return;
+    //     //     this.draft.child.incidents.splice(index, 1);
+    //     // }
+    // }
+
+
+    // @DebugService.log()
+    // public corrupt(flag: boolean) {
+    //     // let corruption = this.draft.child.incidents.find(item => item instanceof CorruptionModel);
+    //     // if (flag) {
+    //     //     if (corruption) return;
+    //     //     corruption = new CorruptionModel();
+    //     //     this.child.incidents.append(corruption);
+    //     // } else {
+    //     //     if (!corruption) return;
+    //     //     this.child.incidents.remove(corruption);
+    //     // }
+    // }
+
+    // @EventAgent.use((model) => model.proxy.event.onChildChange)
+    // @DebugService.log()
+    // private _handleChildChange(target: IngSocModel, event: OnChildChange<IngSocModel>) {
+    //     if (event.prev.minipax !== event.next.minipax) {
+    //         console.log(this, this.constructor.name)
+    //         this.reload();
+    //     }
+    // }
 
 
 
