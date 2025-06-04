@@ -1,39 +1,43 @@
-import { DebugService, EventAgent, Model, OnChildChange, StateAgent, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnChildChange, Props, StateAgent, TranxService } from "set-piece";
 import { StaffModel } from "./staff";
 import { GenderType } from "@/common";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
 import { IncidentModel } from "./incident";
 
-export namespace IngSocDefine {
+export namespace IngSocModel {
     export type P = never;
+    
     export type E = {};
-    export type S1 = { asset: number };
-    export type S2 = { name: string };
-    export type C1 = {
+
+    export type S = { 
+        asset: number;
+        name: string;
+    };
+
+    export type C = {
         minipax: StaffModel;
         miniplenty: StaffModel;
         miniluv: StaffModel;
         minitrue: StaffModel;
+        incidents: IncidentModel[];
     }
-    export type C2 = {
-        incidents: IncidentModel;
-    }
-    export type R1 = {}
-    export type R2 = {}
+    
+    export type R = {}
 }
 
 export class IngSocModel extends Model<
-    IngSocDefine.P,
-    IngSocDefine.E,
-    IngSocDefine.S1,
-    IngSocDefine.S2,
-    IngSocDefine.C1,
-    IngSocDefine.C2,
-    IngSocDefine.R1,
-    IngSocDefine.R2
+    IngSocModel.P,
+    IngSocModel.E,
+    IngSocModel.S,
+    IngSocModel.C,
+    IngSocModel.R
 > {
-    constructor(props?: Model.Props<IngSocModel>) {
+    constructor(props?: Props<
+        IngSocModel.S,
+        IngSocModel.C,
+        IngSocModel.R
+    >) {
         super({
             ...props,
             state: { 
@@ -47,7 +51,8 @@ export class IngSocModel extends Model<
                     state: { 
                         name: 'O\'Brien',
                         salary: 100,
-                        asset: 3_000,
+                        asset: 1000,
+                        value: 0,
                         gender: GenderType.MALE,
                     },
                     child: {
@@ -55,8 +60,9 @@ export class IngSocModel extends Model<
                             new StaffModel({
                                 state: {
                                     name: 'Winston Smith',
-                                    salary: 15,
+                                    salary: 10,
                                     asset: 100,
+                                    value: 100,
                                     gender: GenderType.MALE,
                                 },
                             }),
@@ -64,7 +70,8 @@ export class IngSocModel extends Model<
                                 state: {
                                     name: 'Julia',
                                     salary: 10,
-                                    asset: 20,
+                                    asset: 100,
+                                    value: 100,
                                     gender: GenderType.FEMALE,
                                 }
                             })
@@ -74,16 +81,18 @@ export class IngSocModel extends Model<
                 minipax: new StaffModel({ 
                     state: { 
                         name: 'Aaronson',
-                        salary: 120,
-                        asset: 2_000,
+                        salary: 100,
+                        asset: 1000,
+                        value: 0,
                         gender: GenderType.MALE,
                     }
                 }),
                 miniplenty: new StaffModel({
                     state: {
                         name: 'Rutherford',
-                        salary: 180,
-                        asset: 5_000,
+                        salary: 100,
+                        asset: 1000,
+                        value: 0,
                         gender: GenderType.MALE
                     }
                 }),
@@ -91,30 +100,27 @@ export class IngSocModel extends Model<
                     state: {
                         name: 'Jones',
                         salary: 100,
-                        asset: 6_000,
+                        asset: 1000,
+                        value: 0,
                         gender: GenderType.MALE,
                     }
                 }),
                 ...props?.child 
             },
+            refer: {}
         })
     }
 
     @DebugService.log()
-    public cost() {
-        console.log(this.state.asset)
-        console.log(this.draft.state.asset)
-        this.draft.state.asset -= 100;
-        console.log(this.state.asset)
-        console.log(this.draft.state.asset)
+    public income(value: number): number {
+        console.log('prev', this.state.asset)
+        if (this.draft.state.asset + value < 0) {
+            value = -this.draft.state.asset;
+        }
+        this.draft.state.asset += value;
+        console.log('next', this.state.asset)
+        return value;
     }
-
-    // @StateAgent.use((model) => model.proxy.decor.asset)
-    // @DebugService.log()
-    // private checkAsset(target: IngSocModel, asset: number) {
-    //     console.log('check asset')
-    //     return asset + 100;
-    // }
 
 
     @DebugService.log()
@@ -125,40 +131,30 @@ export class IngSocModel extends Model<
         if (this.draft.child.minipax === prev) {
             console.log('minipax', this.child.minipax.state.name);
             this.draft.child.minipax = next
-            console.log('minipax', this.child.minipax.state.name);
+            console.log('minipax', this.child.minipax.state.name, this.child.minipax.state.salary);
         };
     }
 
-    // @EventAgent.use((model) => model.proxy.child.minitrue.event.onWork)
-    // @EventAgent.use((model) => model.proxy.child.miniplenty.event.onWork)
-    // @EventAgent.use((model) => model.child.minipax?.proxy.event.onWork)
-    // @EventAgent.use((model) => model.child.miniluv?.proxy.event.onWork)
-    // @TranxService.span()
-    // private _handleWork(target: StaffModel, event: StaffModel) {
-    //     const salary = event.state.salary;
-    //     const value = this._decreaseAsset(salary);
-    //     event._increaseAsset(value);
-    // }
+    @EventAgent.use((model) => model.proxy.child.miniluv.event.onApply)
+    @EventAgent.use((model) => model.proxy.child.minipax.event.onApply)
+    @EventAgent.use((model) => model.proxy.child.minitrue.event.onApply)
+    @EventAgent.use((model) => model.proxy.child.miniplenty.event.onApply)
+    @TranxService.span()
+    @DebugService.log()
+    private handleApply(target: unknown, event: StaffModel) {
+        const value = event.state.value - event.state.salary;
+        const result = this.income(value);
+        if (result > value) event.income(-result);
+        else event.income(event.state.salary);
+    }
 
-    // @TranxService.span()
-    // public _decreaseAsset(value: number) {
-    //     this.draft.state.asset -= value;
-    //     if (this.draft.state.asset < 0) {
-    //         value = this.draft.state.asset;
-    //         this.draft.state.asset = 0;
-    //     }
-    //     return value;
-    // }
-
-    // @TranxService.span()
-    // public _increaseAsset(value: number) {
-    //     this.draft.state.asset += value;
-    // }
 
     @DebugService.log()
     public depress(flag: boolean) {
-        console.log(this.draft.child.incidents.length)
         let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
+        console.log(this.child.minitrue.state.salary)
+        console.log(this.child.minitrue.child.subordinates[0]?.state.salary)
+        console.log(this.child.minitrue.child.subordinates[1]?.state.salary)
         if (flag) {
             if (index !== -1) return;
             this.draft.child.incidents.push(new DepressionModel());
@@ -166,9 +162,9 @@ export class IngSocModel extends Model<
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);
         }
-        console.log(this.draft.child.incidents.length)
-        console.log(this.draft.state.asset)
-        console.log(this.state.asset)
+        console.log(this.child.minitrue.state.salary)
+        console.log(this.child.minitrue.child.subordinates[0]?.state.salary)
+        console.log(this.child.minitrue.child.subordinates[1]?.state.salary)
     }
 
 
@@ -183,21 +179,8 @@ export class IngSocModel extends Model<
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);
         }
-        console.log(this.draft.child.incidents.length)
-        console.log(this.draft.state.asset)
-        console.log(this.state.asset)
+        console.log(this.draft.state.asset, this.state.asset)
+        console.log(this.child.minitrue.state.salary)
     }
-
-    // @EventAgent.use((model) => model.proxy.event.onChildChange)
-    // @DebugService.log()
-    // private handleChildChange(target: IngSocModel, event: OnChildChange<IngSocModel>) {
-    //     if (event.prev.minipax !== event.next.minipax) {
-    //         console.log(this, this.constructor.name)
-    //         this.reload();
-    //     }
-    // }
-
-
-
 
 }

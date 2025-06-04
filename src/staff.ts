@@ -1,39 +1,65 @@
 import { GenderType } from "@/common";
-import { DebugService, EventAgent, Model, OnStateChange, StateAgent, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnStateChange, Props, StateAgent, TranxService } from "set-piece";
 import { IngSocModel } from "./ing-soc";
-import { PetModel } from "./pet";
-import { PromotionModel } from "./feature/promotion";
+import { DemoModel } from "./demo";
 import { FeatureModel } from "./feature";
+import { PromotionModel } from "./feature/promotion";
+import { DeepReadonly } from "utility-types";
 
-export namespace StaffDefine {
+export namespace StaffModel {
     export type P = IngSocModel | StaffModel;
-    export type E = { onWork: StaffModel, onEarn: StaffModel };
-    export type S1 = { salary: number; asset: number, _salary: number };
-    export type S2 = { name: string; gender: GenderType; }
-    export type C1 = { pet?: PetModel };
-    export type C2 = { subordinates: StaffModel, features: FeatureModel };
-    export type R1 = { spouse: StaffModel };
-    export type R2 = { friends: StaffModel, offspring: StaffModel };
+
+    export type E = { 
+        onApply: StaffModel, 
+        onEarn: StaffModel 
+    };
+
+    export type S = { 
+        salary: number; 
+        readonly _salary: number;
+        asset: number;  
+        name: string; 
+        value: number;
+        gender: GenderType; 
+        location: { x: number, y: number }
+        tags: string[]
+    };
+
+    export type C = { 
+        subordinates: StaffModel[]
+        features: FeatureModel[]
+    };
+
+    export type R = { 
+        spouse: StaffModel 
+        friends: StaffModel[]
+    };
 }
 
 export class StaffModel extends Model<
-    StaffDefine.P,
-    StaffDefine.E,
-    StaffDefine.S1,
-    StaffDefine.S2,
-    StaffDefine.C1,
-    StaffDefine.C2,
-    StaffDefine.R1,
-    StaffDefine.R2
+    StaffModel.P,
+    StaffModel.E,
+    StaffModel.S,
+    StaffModel.C,
+    StaffModel.R
 > {
-    constructor(props?: Model.Props<StaffModel>) {
+    declare public draft;
+
+    constructor(props?: Props<
+        StaffModel.S,
+        StaffModel.C,
+        StaffModel.R
+    >) {
         super({
             ...props,
             state: { 
                 name: 'John Doe', 
                 gender: GenderType.MALE, 
-                salary: 3000, 
+                salary: 10, 
                 asset: 0, 
+                value: 0,
+                location: { x: 0, y: 0 },
+                tags: [],
                 ...props?.state, 
                 _salary: 0, 
             },
@@ -42,67 +68,106 @@ export class StaffModel extends Model<
                 subordinates: [],
                 ...props?.child 
             },
+            refer: {
+                friends: [],
+                spouse: undefined,
+                ...props?.refer
+            }
         })
     }
 
     @DebugService.log()
-    debug() {
-        console.log(this.agent.route.path);
-        console.log(this.agent.route.key);
+    public apply() {
+        this.event.onApply(this);
     }
 
-    // @TranxService.span()
-    // public _decreaseAsset(value: number) {
-    //     this.draft.state.asset -= value;
-    //     if (this.draft.state.asset < 0) {
-    //         value = this.draft.state.asset;
-    //         this.draft.state.asset = 0;
-    //     }
-    //     return value;
-    // }
+    @EventAgent.use((model) => model.proxy.child.subordinates.event.onApply)
+    private handleApply(target: StaffModel, event: StaffModel) {
+        this.event.onApply(event);
+    }
 
-    // @TranxService.span()
-    // public _increaseAsset(value: number) {
-    //     this.draft.state.asset += value;
-    // }
 
-    // public work() {
-    //     this.event.onWork(this);
-    // }
+    @DebugService.log()
+    public income(value: number): number {
+        console.log('prev', this.state.asset)
+        if (this.draft.state.asset + value < 0) {
+            value = -this.draft.state.asset;
+        }
+        this.draft.state.asset += value;
+        console.log('next', this.state.asset)
+        return value;
+    }
 
-    // public promote() {
-    //     const promotion = new PromotionModel();
-    //     this.draft.child.features.push(promotion);
-    // }
 
-    // @EventAgent.use((model) => model.proxy.child.subordinates.event.onWork)
-    // private _handleWork(target: StaffModel, event: StaffModel) {
-    //     this.event.onWork(event);
-    // }
+    @DebugService.log()
+    public promote() {
+        console.log(this.draft.state.salary, this.state.salary)
+        const promotion = new PromotionModel();
+        this.draft.child.features.push(promotion);
+        console.log(this.draft.state.salary, this.state.salary)
+        console.log([...this.child.features])
+    }
+
     
-    // @StateAgent.use((model) => model.proxy.decor.salary)
-    // @StateAgent.use((model) => model.proxy.child.subordinates.decor._salary)
-    // private _checkSalary(target: StaffModel, state: number) {
-    //     return state + this.state._salary;
-    // }
+    @DebugService.log()
+    public demote() {
+        const features = this.draft.child.features;
+        const index = features.findIndex((feature) => feature instanceof PromotionModel);
+        if (index === -1) return;
+        features.splice(index, 1);
+    }
 
-    // @EventAgent.use((model) => model.proxy.event.onStateChange)
-    // private _checkSalaryChange(target: StaffModel, event: OnStateChange<StaffModel>) {
-    //     if (event.prev._salary !== event.next._salary) {
-    //         this.reload()
-    //     }
-    // }
+    @StateAgent.use((model) => model.proxy.decor)
+    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+        return {
+            ...state,
+            salary: state.salary + this.state._salary,
+        }
+    }
 
+    @StateAgent.use((model) => model.proxy.child.subordinates.decor)
+    private _checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+        return {
+            ...state,
+            _salary: this.state._salary,
+        }
+    }
 
-    // public replace(next: StaffModel, prev: StaffModel) {
-    //     for (let index = 0; index < this.draft.child.subordinates.length; index++) {
-    //         if (this.draft.child.subordinates[index] === prev) {
-    //             this.draft.child.subordinates[index] = next;
-    //             return next;
-    //         }
-    //     }
-    //     return undefined;
-    // }
+    @EventAgent.use((model) => model.proxy.event.onStateChange)
+    private handleStateChange(target: StaffModel, event: OnStateChange<StaffModel>) {
+        const prev = event.prev._salary;
+        const next = event.next._salary;
+        if (prev !== next) {
+            this.reload();
+        }
+    }
 
-   
+    @DebugService.log()
+    public hello(staff: StaffModel) {
+        this.draft.refer.friends.push(staff);
+        console.log([ ...this.refer.friends ])
+    }
+
+    @DebugService.log()
+    public remove(staff: StaffModel) {
+        const index = this.child.subordinates.indexOf(staff);
+        if (index === -1) return undefined;
+        this.draft.child.subordinates.splice(index, 1);
+        return staff;
+    }
+
+    
+    private _pace: number = 0;
+    public get pace() {
+        return this._pace;
+    }
+
+    @EventAgent.use((model) => model.proxy.event.onStateChange)
+    public handleMove(target: StaffModel, event: OnStateChange<StaffModel>) {
+        const prev = event.prev.location;
+        const next = event.next.location;
+        if (prev.x !== next.x || prev.y !== next.y) {
+            this._pace += 1;
+        }
+    }
 }

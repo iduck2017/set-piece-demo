@@ -1,191 +1,104 @@
-// import { ModelCycle } from "set-piece";
-// import { IngSocModel } from "../src/ing-soc"
-// import { StaffModel } from "../src/staff";
-// import { GenderType } from "@/common";
+import { RouteAgent } from "set-piece";
+import { IngSocModel } from "../src/ing-soc"
+import { StaffModel } from "../src/staff";
+import { GenderType } from "@/common";
 
-// console.log = () => undefined
-// console.group = () => undefined
-// console.groupEnd = () => undefined
+console.log = () => undefined
+console.group = () => undefined
+console.groupEnd = () => undefined
 
-// describe('event', () => {
-//     const ingsoc = new IngSocModel();
+describe('event', () => {
+    const ingsoc = new IngSocModel();
 
-//     const obrien = ingsoc.child.minitrue;
-//     const aaronson = ingsoc.child.minipax;
-//     const rutherford = ingsoc.child.miniplenty;
-//     const jones = ingsoc.child.miniluv;
-//     const goldstein = new StaffModel({
-//         state: {
-//             name: 'Emmanuel Goldstein',
-//             salary: 200,
-//             asset: 8_000,
-//             gender: GenderType.MALE,
-//         }
-//     })
-
-//     let partyAsset = ingsoc.state.asset;
-
-//     let jonesAsset = jones.state.asset;
-//     let aaronsonAsset = aaronson.state.asset;
-//     let rutherfordAsset = rutherford.state.asset;
-//     let obrienAsset = obrien.state.asset;
-//     let goldsteinAsset = goldstein.state.asset;
-
-//     let jonesSalary = jones.state.salary;
-//     let aaronsonSalary = aaronson.state.salary;
-//     let rutherfordSalary = rutherford.state.salary;
-//     let obrienSalary = obrien.state.salary;
-//     let goldsteinSalary = goldstein.state.salary;
+    const obrien = ingsoc.child.minitrue;
+    const goldstein = new StaffModel({
+        state: {
+            name: 'Emmanuel Goldstein',
+            salary: 100,
+            asset: 1000,
+            value: 0,
+            gender: GenderType.MALE,
+        }
+    })
 
 
-//     test('event_not_load', () => {
-//         jones.work();
-//         jonesAsset += 0;
-//         partyAsset -= 0;
-//         expect(jones.state.asset).toBe(jonesAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//     })
+    const winston = obrien.child.subordinates[0];
+    const julia = obrien.child.subordinates[1];
 
-//     test('event_load', () => {
-//         ModelCycle.boot(ingsoc);
-//         jones.work();
-//         jonesAsset += jonesSalary;
-//         partyAsset -= jonesSalary;
-//         expect(jones.state.asset).toBe(jonesAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
+    const assets = ingsoc.state.asset;
 
-//         jones.work();
-//         jonesAsset += jonesSalary;
-//         partyAsset -= jonesSalary;
-//         expect(jones.state.asset).toBe(jonesAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//     })
+    test('precheck', () => {
+        expect(winston).toBeDefined();
+        expect(julia).toBeDefined();
+    })
 
-
-//     test('event_unload', () => {
-//         ingsoc.purge(goldstein, jones);
-//         expect(ingsoc.child.miniluv).toBe(goldstein);
-//         jones.work();
-//         jonesAsset += 0;
-//         partyAsset -= 0;
-//         expect(jones.state.asset).toBe(jonesAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//     })
-
-//     test('event_not_reload', () => {
-//         goldstein.work();
-//         goldsteinAsset += 0;
-//         partyAsset -= 0;
-//         expect(goldstein.state.asset).toBe(goldsteinAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-
-//         ingsoc.purge(jones, goldstein);
-//         expect(ingsoc.child.miniluv).toBe(jones);
-//         jones.work();
-//         jonesAsset += 0;
-//         partyAsset -= 0;
-//         expect(jones.state.asset).toBe(jonesAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//     })
-
-
-//     test('event_auto_reload', () => {
-//         ingsoc.purge(goldstein, aaronson);
-//         expect(ingsoc.child.minipax).toBe(goldstein);
-//         goldstein.work();
-//         goldsteinAsset += goldsteinSalary;
-//         partyAsset -= goldsteinSalary;
-//         expect(goldstein.state.asset).toBe(goldsteinAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-
-//         ingsoc.purge(aaronson, goldstein);
-//         expect(ingsoc.child.minipax).toBe(aaronson);
-//         aaronson.work();
-//         aaronsonAsset += aaronsonSalary;
-//         partyAsset -= aaronsonSalary;
-//         expect(aaronson.state.asset).toBe(aaronsonAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//     })
-
-//     test('event_bubble', () => {
-//         ingsoc.purge(goldstein, rutherford);
-//         expect(ingsoc.child.miniplenty).toBe(goldstein);
-//         goldstein.work();
-//         goldsteinAsset += goldsteinSalary;
-//         partyAsset -= goldsteinSalary;
-//         expect(goldstein.state.asset).toBe(goldsteinAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-
-//         ingsoc.purge(rutherford, goldstein);
-//         expect(ingsoc.child.miniplenty).toBe(rutherford);
-//         rutherford.work();
-//         rutherfordAsset += rutherfordSalary;
-//         partyAsset -= rutherfordSalary;
-//         expect(rutherford.state.asset).toBe(rutherfordAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-        
-//     })
-
+    if (!winston || !julia) return;
     
-//     const winston = obrien.child[0];
-//     const julia = obrien.child[1];
-//     const ampleforth = new StaffModel({
-//         state: {
-//             name: 'Ampleforth',
-//             salary: 10,
-//             asset: 80,
-//         }
-//     })
+    test('apply', () => {
+        expect(winston.state.salary).toBe(10);
+        expect(winston.state.value).toBe(100);
+        expect(winston.state.asset).toBe(100);
+        winston.apply()
+        expect(winston.state.asset).toBe(100);
+        expect(ingsoc.state.asset).toBe(assets);
+    })
+
+    test('boot', () => {
+        RouteAgent.init(ingsoc);
+        winston.apply();
+        expect(winston.state.asset).toBe(110);
+        expect(ingsoc.state.asset).toBe(assets + 90);
+
+        julia.apply();
+        expect(julia.state.asset).toBe(110);
+        expect(ingsoc.state.asset).toBe(assets + 180);
 
 
-//     test('precheck', () => {
-//         expect(winston).toBeDefined();
-//         expect(julia).toBeDefined();
-//         expect(ampleforth).toBeDefined();
-//     })
+        obrien.apply();
+        expect(obrien.state.asset).toBe(1100);
+        expect(ingsoc.state.asset).toBe(assets + 80)
+        
+    })
 
-//     if (!winston || !julia || !ampleforth) {
-//         return;
-//     }
-//     let winstonAsset = winston.state.asset;
-//     let juliaAsset = julia.state.asset;
-//     let ampleforthAsset = ampleforth.state.asset;
+    test('promote', () => {
+        winston.promote();
+        expect(winston.state.salary).toBe(20);
 
-//     let winstonSalary = winston.state.salary;
-//     let juliaSalary = julia.state.salary;
-//     let ampleforthSalary = ampleforth.state.salary;
+        winston.apply();
+        expect(winston.state.asset).toBe(130);
+        expect(ingsoc.state.asset).toBe(assets + 160);
+    })
 
-//     test('event_recurse', () => {
-//         obrien.work();
-//         obrienAsset += obrienSalary;
-//         partyAsset -= obrienSalary;
-//         expect(obrien.state.asset).toBe(obrienAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//         expect(obrien.child[0]).toBe(winston);
-//         expect(obrien.child[1]).toBe(julia);
+    test('corruption', () => {
+        
+        ingsoc.corrupt(true);
+        
+        expect(ingsoc.state.asset).toBe(assets - 20000 + 160);
+        obrien.apply();
+        expect(obrien.state.asset).toBe(1300);
+        expect(ingsoc.state.asset).toBe(assets - 20000 - 40);
 
-//         winston.work();
-//         winstonAsset += winstonSalary;
-//         partyAsset -= winstonSalary;
-//         expect(winston.state.asset).toBe(winstonAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-
-//         julia.work();
-//         juliaAsset += juliaSalary;
-//         partyAsset -= juliaSalary;
-//         expect(julia.state.asset).toBe(juliaAsset);
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-
-//         obrien.replace(ampleforth, winston);
-//         expect(obrien.child[0]).toBe(ampleforth);
-//         expect(obrien.child[1]).toBe(julia);
-//         ampleforth.work();
-//         ampleforthAsset += ampleforthSalary;
-//         partyAsset -= ampleforthSalary;
-//         expect(ingsoc.state.asset).toBe(partyAsset);
-//         expect(ampleforth.state.asset).toBe(ampleforthAsset);
-//     })
+        ingsoc.corrupt(false);
+        expect(ingsoc.child.incidents.length).toBe(0);
+        expect(ingsoc.state.asset).toBe(assets - 40);
+    })
 
 
+    test('purge', () => {
+        ingsoc.purge(goldstein, obrien);
 
-// })
+        expect(goldstein.state.asset).toBe(1000);
+        expect(goldstein.state.salary).toBe(100);
+        goldstein.apply();
+        expect(goldstein.state.asset).toBe(1100);
+        expect(ingsoc.state.asset).toBe(assets - 140);
+        
+        obrien.apply();
+        expect(obrien.state.asset).toBe(1300);
+        expect(ingsoc.state.asset).toBe(assets - 140);
+
+        winston.apply();
+        expect(winston.state.asset).toBe(130);
+        expect(ingsoc.state.asset).toBe(assets - 140);
+    })
+})

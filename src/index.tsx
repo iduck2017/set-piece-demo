@@ -16,7 +16,8 @@ export class AppService {
     private constructor() {}
 
     static async boot() {
-        AppService._rootModel = RouteAgent.init(new IngSocModel({}));
+        const ingsoc = new IngSocModel();
+        AppService._rootModel = RouteAgent.init(ingsoc);
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
@@ -27,30 +28,25 @@ export class AppService {
     static test() {
         const ingsoc = AppService._rootModel;
         if (!ingsoc) return;
-        ingsoc.cost();
-        const winston = ingsoc.child.minitrue.child.subordinates[0];
+
         const obrien = ingsoc.child.minitrue;
         const aaronson = ingsoc.child.minipax;
         const goldstein = new StaffModel({
             state: {
                 name: 'Emmanuel Goldstein',
-                salary: 200,
-                asset: 8_000,
+                salary: 100,
+                asset: 10_000,
+                value: 0,
                 gender: GenderType.MALE,
             }
-        })
+        });
+
+
+        const winston = obrien.child.subordinates[0];
+        const julia = obrien.child.subordinates[1];
+
         if (!winston) return;
-        winston.debug();
-        obrien.debug();
-        goldstein.debug();
-        ingsoc.purge(goldstein, aaronson);
-        ingsoc.corrupt(true);
-        ingsoc.purge(aaronson, goldstein);
-        // ingsoc.depress(true);
-        // console.log(winston?.state.salary);
-        // console.log(julia?.state.salary);
-        // console.log(obrien.state.salary);
-        // console.log(aaronson.state.salary);
+        if (!julia) return;
     }
 }
 

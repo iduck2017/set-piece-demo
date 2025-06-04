@@ -1,41 +1,50 @@
-import { StaffModel } from "../staff";
-import { EventAgent, Model, OnChildChange, OnStateChange, StateAgent } from "set-piece";
+import { Model, Props, StateAgent } from "set-piece";
+import { IncidentModel } from ".";
 import { IngSocModel } from "../ing-soc";
-import { IncidentDefine, IncidentModel } from ".";
+import { StaffModel } from "@/staff";
+import { DeepReadonly } from "utility-types";
 
-export namespace CorruptionDefine {
-    export type P = IncidentDefine.P;
+export namespace CorruptionModel {
+    export type P = IngSocModel;
     export type E = {};
-    export type S1 = {};
-    export type S2 = {};
+    export type S = {};
+    export type C = {};
+    export type R = {};
 }
 
 export class CorruptionModel extends IncidentModel<
-    CorruptionDefine.P,
-    CorruptionDefine.E,
-    CorruptionDefine.S1,
-    CorruptionDefine.S2
+    CorruptionModel.P,
+    CorruptionModel.E,
+    CorruptionModel.S,
+    CorruptionModel.C,
+    CorruptionModel.R
 > {
-    constructor(props?: Model.Props<CorruptionModel>) {
+    constructor(props?: Props) {
         super({
             ...props,
             state: {},
-            child: {}
+            child: {},
+            refer: {}
         })
     }
 
-    @StateAgent.use((model) => model.parent?.proxy.child.miniplenty.decor.salary)
-    @StateAgent.use((model) => model.parent?.proxy.child.minitrue.decor.salary)
-    @StateAgent.use((model) => model.parent?.proxy.child.miniluv.decor.salary)
-    @StateAgent.use((model) => model.parent?.proxy.child.minipax.decor.salary)
-    private checkSalary(target: StaffModel, state: number) {
-        return state + 100;
+    @StateAgent.use((model) => model.route.parent?.proxy.child.miniplenty.decor)
+    @StateAgent.use((model) => model.route.parent?.proxy.child.minitrue.decor)
+    @StateAgent.use((model) => model.route.parent?.proxy.child.miniluv.decor)
+    @StateAgent.use((model) => model.route.parent?.proxy.child.minipax.decor)
+    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+        return {
+            ...state,
+            salary: state.salary + 100,
+        }
     }
 
-    @StateAgent.use((model) => model.parent?.proxy.decor.asset)
-    private checkAsset(target: IngSocModel, state: number) {
-        console.log('checkAsset', state)
-        return state -= 20_000;
+    @StateAgent.use((model) => model.route.parent?.proxy.decor)
+    private checkAsset(target: IngSocModel, state: IngSocModel.S) {
+        return {
+            ...state,
+            asset: state.asset - 20000,
+        }
     }
 
 }
