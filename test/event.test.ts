@@ -44,7 +44,7 @@ describe('event', () => {
     })
 
     test('boot', () => {
-        RouteAgent.init(ingsoc);
+        RouteAgent.boot(ingsoc);
         winston.apply();
         expect(winston.state.asset).toBe(110);
         expect(ingsoc.state.asset).toBe(assets + 90);

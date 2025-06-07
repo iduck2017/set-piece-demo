@@ -15,9 +15,11 @@ export class AppService {
 
     private constructor() {}
 
+    @DebugService.log()
     static async boot() {
         const ingsoc = new IngSocModel();
-        AppService._rootModel = RouteAgent.init(ingsoc);
+        console.log('ingsoc', ingsoc);
+        AppService._rootModel = RouteAgent.boot(ingsoc);
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
@@ -26,30 +28,30 @@ export class AppService {
 
     @DebugService.log()
     static test() {
-        const ingsoc = AppService._rootModel;
-        if (!ingsoc) return;
+        // const ingsoc = AppService._rootModel;
+        // if (!ingsoc) return;
 
-        const obrien = ingsoc.child.minitrue;
-        const aaronson = ingsoc.child.minipax;
-        const goldstein = new StaffModel({
-            state: {
-                name: 'Emmanuel Goldstein',
-                salary: 100,
-                asset: 10_000,
-                value: 0,
-                gender: GenderType.MALE,
-            }
-        });
+        // const obrien = ingsoc.child.minitrue;
+        // const aaronson = ingsoc.child.minipax;
+        // const goldstein = new StaffModel({
+        //     state: {
+        //         name: 'Emmanuel Goldstein',
+        //         salary: 100,
+        //         asset: 10_000,
+        //         value: 0,
+        //         gender: GenderType.MALE,
+        //     }
+        // });
 
 
-        const winston = obrien.child.subordinates[0];
-        const julia = obrien.child.subordinates[1];
+        // const winston = obrien.child.subordinates[0];
+        // const julia = obrien.child.subordinates[1];
 
-        if (!winston) return;
-        if (!julia) return;
+        // if (!winston) return;
+        // if (!julia) return;
     }
 }
 
 window.app = AppService;
 AppService.boot();
-AppService.test();
+// AppService.test();

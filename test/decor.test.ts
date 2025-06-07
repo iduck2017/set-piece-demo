@@ -43,7 +43,7 @@ describe('decor', () => {
     })
 
     test('boot', () => {
-        RouteAgent.init(ingsoc);
+        RouteAgent.boot(ingsoc);
         expect(winston.state.salary).toBe(20);
         expect(winston.draft.state.salary).toBe(10);
     })
