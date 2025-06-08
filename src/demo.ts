@@ -30,7 +30,7 @@ export namespace DemoModel {
     }
     
     export type R = { 
-        foo: DemoModel,
+        foo?: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
     }
@@ -117,18 +117,16 @@ export class DemoModel extends Model<
                 location: { x: 0, y: 0 },
                 ...props?.state,
             },
-            child: { 
+            child: () => ({ 
                 foo: new DemoModel(),
                 bar: new DemoModel(),
                 baz: [],
-                ...props?.child 
-            },
-            refer: {
-                foo: undefined,
-                bar: undefined,
+                ...props?.child?.()
+            }),
+            refer: () => ({
                 baz: [],
-                ...props?.refer
-            }
+                ...props?.refer?.()
+            })
         })
     }
 

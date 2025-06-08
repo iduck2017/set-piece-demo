@@ -31,7 +31,7 @@ export namespace StaffModel {
     };
 
     export type R = { 
-        spouse: StaffModel 
+        spouse?: StaffModel 
         friends: StaffModel[]
     };
 }
@@ -45,7 +45,7 @@ export class StaffModel extends Model<
 > {
     declare public draft;
 
-    constructor(props?: Props<
+    constructor(props: Props<
         StaffModel.S,
         StaffModel.C,
         StaffModel.R
@@ -63,17 +63,20 @@ export class StaffModel extends Model<
                 ...props?.state, 
                 _salary: 0, 
             },
-            child: { 
+            child: () => ({ 
                 features: [],
                 subordinates: [],
-                ...props?.child 
-            },
-            refer: {
+                ...props?.child?.()
+            }),
+            refer: () => ({
                 friends: [],
-                spouse: undefined,
-                ...props?.refer
-            }
+                ...props?.refer?.()
+            })
         })
+    }
+
+    public get name() {
+        return this.state.name;
     }
 
     @DebugService.log()
@@ -142,10 +145,12 @@ export class StaffModel extends Model<
         }
     }
 
+    @TranxService.span()
     @DebugService.log()
     public hello(staff: StaffModel) {
         this.draft.refer.friends.push(staff);
-        console.log([ ...this.refer.friends ])
+        console.log('friends', this.refer.friends.length)
+        return [ ...this.refer.friends ];
     }
 
     @DebugService.log()
@@ -156,7 +161,7 @@ export class StaffModel extends Model<
         return staff;
     }
 
-    
+
     private _pace: number = 0;
     public get pace() {
         return this._pace;

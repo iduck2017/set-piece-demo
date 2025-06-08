@@ -19,8 +19,8 @@ export class DepressionModel extends IncidentModel<
         super({
             ...props,
             state: { level: 1 },
-            child: {},
-            refer: {}
+            child: () => ({}),
+            refer: () => ({})
         })
     }
     
