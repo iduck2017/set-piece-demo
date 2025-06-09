@@ -1,10 +1,11 @@
 import { GenderType } from "@/common";
-import { DebugService, EventAgent, Model, OnStateChange, Props, StateAgent, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnStateChange, Props, StateAgent, StoreService, TranxService } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { DemoModel } from "./demo";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
 import { DeepReadonly } from "utility-types";
+
 
 export namespace StaffModel {
     export type P = IngSocModel | StaffModel;
@@ -36,6 +37,7 @@ export namespace StaffModel {
     };
 }
 
+@StoreService.is('staff')
 export class StaffModel extends Model<
     StaffModel.P,
     StaffModel.E,
@@ -145,8 +147,8 @@ export class StaffModel extends Model<
         }
     }
 
-    @TranxService.span()
-    @DebugService.log()
+    @TranxService.use()
+    @DebugService.log((model) => model.name)
     public hello(staff: StaffModel) {
         this.draft.refer.friends.push(staff);
         console.log('friends', this.refer.friends.length)

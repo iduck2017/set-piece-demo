@@ -1,9 +1,10 @@
-import { DebugService, EventAgent, Model, OnChildChange, Props, StateAgent, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnChildChange, Props, StateAgent, StoreService, TranxService } from "set-piece";
 import { StaffModel } from "./staff";
 import { GenderType } from "@/common";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
 import { IncidentModel } from "./incident";
+
 
 export namespace IngSocModel {
     export type P = never;
@@ -26,6 +27,8 @@ export namespace IngSocModel {
     export type R = {}
 }
 
+
+@StoreService.is('ing-soc')
 export class IngSocModel extends Model<
     IngSocModel.P,
     IngSocModel.E,
@@ -130,6 +133,8 @@ export class IngSocModel extends Model<
 
         if (!winston) return;
         if (!julia) return;
+
+        console.log(StoreService.save(this))
     }
 
     @DebugService.log()
@@ -160,7 +165,7 @@ export class IngSocModel extends Model<
     @EventAgent.use((model) => model.proxy.child.minipax.event.onApply)
     @EventAgent.use((model) => model.proxy.child.minitrue.event.onApply)
     @EventAgent.use((model) => model.proxy.child.miniplenty.event.onApply)
-    @TranxService.span()
+    @TranxService.use()
     @DebugService.log()
     private handleApply(target: unknown, event: StaffModel) {
         const value = event.state.value - event.state.salary;

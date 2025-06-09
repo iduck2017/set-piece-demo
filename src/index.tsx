@@ -15,6 +15,7 @@ export class AppService {
 
     private constructor() {}
 
+    @DebugService.log()
     static async boot() {
         const ingsoc = new IngSocModel();
         console.log('create', ingsoc);
