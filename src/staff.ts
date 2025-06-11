@@ -65,15 +65,15 @@ export class StaffModel extends Model<
                 ...props?.state, 
                 _salary: 0, 
             },
-            child: () => ({ 
+            child: { 
                 features: [],
                 subordinates: [],
-                ...props?.child?.()
-            }),
-            refer: () => ({
+                ...props?.child
+            },
+            refer: {
                 friends: [],
-                ...props?.refer?.()
-            })
+                ...props?.refer
+            }
         })
     }
 
@@ -150,9 +150,9 @@ export class StaffModel extends Model<
     @TranxService.use()
     @DebugService.log((model) => model.name)
     public hello(staff: StaffModel) {
-        this.draft.refer.friends.push(staff);
-        console.log('friends', this.refer.friends.length)
-        return [ ...this.refer.friends ];
+        this.draft.refer.friends?.push(staff);
+        console.log('friends', this.refer.friends?.length)
+        return [ ...this.refer.friends ?? [] ];
     }
 
     @DebugService.log()

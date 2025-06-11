@@ -53,6 +53,7 @@ export class DemoModel extends Model<
         const tags: ReadonlyArray<string> = this.state.tags;
         const location: { x: number, y: number } = this.state.location;
 
+
         // this.state.location.x += 100;
         // this.state.emotion = EmotionType.HAPPY;
 
@@ -79,7 +80,7 @@ export class DemoModel extends Model<
         const foo_2: DemoModel | undefined = this.draft.refer.foo;
         // const foo_3: PetModel = this.draft.refer.foo;
         const bar_2: DemoModel | undefined = this.draft.refer.bar;
-        const baz_2: DemoModel[] = this.draft.refer.baz;
+        const baz_2: DemoModel[] | undefined = this.draft.refer.baz;
 
         this.draft.refer.foo = new DemoModel();
         this.draft.refer.bar = new DemoModel();
@@ -117,16 +118,15 @@ export class DemoModel extends Model<
                 location: { x: 0, y: 0 },
                 ...props?.state,
             },
-            child: () => ({ 
+            child: { 
                 foo: new DemoModel(),
                 bar: new DemoModel(),
                 baz: [],
-                ...props?.child?.()
-            }),
-            refer: () => ({
+                ...props?.child
+            },
+            refer: {
                 baz: [],
-                ...props?.refer?.()
-            })
+            }
         })
     }
 

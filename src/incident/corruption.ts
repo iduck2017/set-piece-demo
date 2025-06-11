@@ -23,8 +23,8 @@ export class CorruptionModel extends IncidentModel<
         super({
             ...props,
             state: {},
-            child: () => ({}),
-            refer: () => ({})
+            child: { ...props?.child },
+            refer: { ...props?.refer }
         })
     }
 

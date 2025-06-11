@@ -15,12 +15,12 @@ export class DepressionModel extends IncidentModel<
     DepressionModel.E,
     DepressionModel.S
 > {
-    constructor(props?: Props) {
+    constructor(props?: Props<DepressionModel.S, {}, {}>) {
         super({
             ...props,
-            state: { level: 1 },
-            child: () => ({}),
-            refer: () => ({})
+            state: { level: 1, ...props?.state },
+            child: { ...props?.child },
+            refer: { ...props?.refer }
         })
     }
     

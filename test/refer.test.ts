@@ -30,17 +30,17 @@ describe('refer', () => {
     if (!winston || !julia) return;
 
     test('refer', () => {
-        expect(winston.refer.friends.length).toBe(0);
+        expect(winston.refer.friends?.length).toBe(0);
         winston.hello(julia);
         winston.hello(syme)
-        expect(winston.refer.friends.length).toBe(0);
+        expect(winston.refer.friends?.length).toBe(0);
     })
 
     test('boot', () => {
         RouteAgent.boot(ingsoc);
-        expect(winston.refer.friends.length).toBe(2);
-        expect(winston.refer.friends[0]).toBe(julia);
-        expect(winston.refer.friends[1]).toBe(undefined);
+        expect(winston.refer.friends?.length).toBe(2);
+        expect(winston.refer.friends?.[0]).toBe(julia);
+        expect(winston.refer.friends?.[1]).toBe(undefined);
     })
 
 

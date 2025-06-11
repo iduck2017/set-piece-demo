@@ -48,7 +48,7 @@ export class IngSocModel extends Model<
                 asset: 100_000, 
                 ...props?.state 
             },
-            child: () => ({ 
+            child: { 
                 incidents: [],
                 minitrue: new StaffModel({ 
                     state: { 
@@ -58,7 +58,7 @@ export class IngSocModel extends Model<
                         value: 0,
                         gender: GenderType.MALE,
                     },
-                    child: () => ({
+                    child: {
                         subordinates: [
                             new StaffModel({
                                 state: {
@@ -79,7 +79,7 @@ export class IngSocModel extends Model<
                                 }
                             })
                         ] 
-                    })
+                    },
                 }),
                 minipax: new StaffModel({ 
                     state: { 
@@ -109,11 +109,12 @@ export class IngSocModel extends Model<
                     }
                 }),
                 ...props?.child 
-            }),
-            refer: () => ({})
+            },
+            refer: { ...props?.refer }
         })
     }
 
+    @DebugService.log()
     public test() {
         const obrien = this.child.minitrue;
         const aaronson = this.child.minipax;

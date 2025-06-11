@@ -7,9 +7,9 @@ export class PromotionModel extends FeatureModel {
     constructor(props?: Props) {
         super({
             ...props,
-            state: { ...props?.state },
-            child: () => ({ ...props?.child?.() }),
-            refer: () => ({ ...props?.refer?.() })
+            state: {},
+            child: { ...props?.child },
+            refer: { ...props?.refer }
         })
     }
 
