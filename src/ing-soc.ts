@@ -114,42 +114,7 @@ export class IngSocModel extends Model<
         })
     }
 
-    @DebugService.log()
-    public test() {
-        const obrien = this.child.minitrue;
-        const aaronson = this.child.minipax;
-        const goldstein = new StaffModel({
-            state: {
-                name: 'Emmanuel Goldstein',
-                salary: 100,
-                asset: 10_000,
-                value: 0,
-                gender: GenderType.MALE,
-            }
-        });
-
-
-        const winston = obrien.child.subordinates[0];
-        const julia = obrien.child.subordinates[1];
-
-        if (!winston) return;
-        if (!julia) return;
-
-        console.log(StoreService.save(this))
-        winston.hello(goldstein);
-        console.log('friends', winston.refer.friends?.map(item => item.name))
-
-        winston.hello(julia);
-        console.log('friends', winston.refer.friends?.map(item => item.name))
     
-        console.log('salary', winston.state.salary);
-        winston.promote();
-        console.log('salary', winston.state.salary)
-
-        obrien.remove(julia);
-        console.log('sub', obrien.child.subordinates.map(item => item.name));
-        console.log(winston);
-    }
 
     @DebugService.log()
     public income(value: number): number {

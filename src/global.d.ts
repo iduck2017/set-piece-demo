@@ -9,6 +9,6 @@ declare module '*.scss' {
 declare global {
     interface Window {
         app: AppService | undefined;
-        model: IngSocModel | undefined;
+        root: IngSocModel | undefined;
     }
 }

@@ -169,12 +169,4 @@ export class StaffModel extends Model<
         return this._pace;
     }
 
-    @EventAgent.use((model) => model.proxy.event.onStateChange)
-    public handleMove(target: StaffModel, event: OnStateChange<StaffModel>) {
-        const prev = event.prev.location;
-        const next = event.next.location;
-        if (prev.x !== next.x || prev.y !== next.y) {
-            this._pace += 1;
-        }
-    }
 }
