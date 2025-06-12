@@ -33,17 +33,34 @@ describe('refer', () => {
         expect(winston.refer.friends?.length).toBe(0);
         winston.hello(julia);
         winston.hello(syme)
+        expect(winston.refer.friends?.length).toBe(1);
+        expect(winston.refer.friends?.[0]).toBe(julia);
+    })
+
+    test('tranx', () => {
+        const result = winston.hello(syme);
+        expect(result?.length).toBe(2);
+        expect(result?.[0]).toBe(julia);
+        expect(result?.[1]).toBe(syme);
+        expect(winston.refer.friends?.length).toBe(1);
+    })
+
+
+    test('bind', () => {
+        aaronson.draft.child.subordinates.push(syme);
+        expect(aaronson.child.subordinates.length).toBe(1);
+        winston.hello(syme);
+        expect(winston.refer.friends?.length).toBe(2);
+    })
+
+    test('unbind', () => {
+        obrien.remove(julia);
+        expect(obrien.child.subordinates.length).toBe(1);
+        expect(winston.refer.friends?.length).toBe(1);
+        expect(winston.refer.friends?.[0]).toBe(syme)
+        aaronson.remove(syme);
         expect(winston.refer.friends?.length).toBe(0);
     })
 
-    test('boot', () => {
-        RouteAgent.boot(ingsoc);
-        expect(winston.refer.friends?.length).toBe(2);
-        expect(winston.refer.friends?.[0]).toBe(julia);
-        expect(winston.refer.friends?.[1]).toBe(undefined);
-    })
-
-
-    test('spawn')
 
 })

@@ -1,7 +1,4 @@
-import { GenderType } from "@/common"
-import { StaffModel } from "../src/staff"
 import { IngSocModel } from "../src/ing-soc"
-import { RouteAgent } from "set-piece"
 
 console.log = () => undefined
 console.group = () => undefined

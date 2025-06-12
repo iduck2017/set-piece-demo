@@ -2,7 +2,11 @@ import { GenderType } from "@/common";
 import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
 
-test.skip('child', () => {
+console.log = () => undefined
+console.group = () => undefined
+console.groupEnd = () => undefined
+
+describe('child', () => {
     
     const ingsoc = new IngSocModel();
 

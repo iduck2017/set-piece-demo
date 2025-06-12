@@ -136,6 +136,19 @@ export class IngSocModel extends Model<
         if (!julia) return;
 
         console.log(StoreService.save(this))
+        winston.hello(goldstein);
+        console.log('friends', winston.refer.friends?.map(item => item.name))
+
+        winston.hello(julia);
+        console.log('friends', winston.refer.friends?.map(item => item.name))
+    
+        console.log('salary', winston.state.salary);
+        winston.promote();
+        console.log('salary', winston.state.salary)
+
+        obrien.remove(julia);
+        console.log('sub', obrien.child.subordinates.map(item => item.name));
+        console.log(winston);
     }
 
     @DebugService.log()

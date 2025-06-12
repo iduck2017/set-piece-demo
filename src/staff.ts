@@ -147,12 +147,12 @@ export class StaffModel extends Model<
         }
     }
 
-    @TranxService.use()
     @DebugService.log((model) => model.name)
+    @TranxService.use()
     public hello(staff: StaffModel) {
         this.draft.refer.friends?.push(staff);
-        console.log('friends', this.refer.friends?.length)
-        return [ ...this.refer.friends ?? [] ];
+        console.log('friends', this.refer.friends?.map(item => item.name))
+        return [...this.draft.refer.friends ?? []]
     }
 
     @DebugService.log()

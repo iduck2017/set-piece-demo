@@ -59,12 +59,7 @@ test.skip('route', () => {
         expect(winston.route.parent).toBe(aaronson);
     })
 
-
     test('boot', () => {
-        expect(winston.route.root).toBe(undefined);
-        expect(obrien.route.root).toBe(undefined);
-        expect(ingsoc.route.root).toBe(undefined);
-        RouteAgent.boot(ingsoc);
         expect(winston.route.root).toBe(ingsoc);
         expect(obrien.route.root).toBe(ingsoc);
         expect(ingsoc.route.root).toBe(ingsoc);
