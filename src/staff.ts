@@ -8,14 +8,12 @@ import { DeepReadonly } from "utility-types";
 
 
 export namespace StaffModel {
-    export type P = IngSocModel | StaffModel;
-
-    export type E = { 
+    export type Event = { 
         onApply: StaffModel, 
         onEarn: StaffModel 
     };
 
-    export type S = { 
+    export type State = { 
         salary: number; 
         readonly _salary: number;
         asset: number;  
@@ -26,12 +24,12 @@ export namespace StaffModel {
         tags: string[]
     };
 
-    export type C = { 
+    export type Child = { 
         subordinates: StaffModel[]
         features: FeatureModel[]
     };
 
-    export type R = { 
+    export type Refer = { 
         spouse?: StaffModel 
         friends: StaffModel[]
     };
@@ -39,18 +37,18 @@ export namespace StaffModel {
 
 @StoreService.is('staff')
 export class StaffModel extends Model<
-    StaffModel.P,
-    StaffModel.E,
-    StaffModel.S,
-    StaffModel.C,
-    StaffModel.R
+    IngSocModel | StaffModel,
+    StaffModel.Event,
+    StaffModel.State,
+    StaffModel.Child,
+    StaffModel.Refer
 > {
     declare public draft;
 
     constructor(props: Props<
-        StaffModel.S,
-        StaffModel.C,
-        StaffModel.R
+        StaffModel.State,
+        StaffModel.Child,
+        StaffModel.Refer
     >) {
         super({
             ...props,
@@ -123,7 +121,7 @@ export class StaffModel extends Model<
     }
 
     @StateAgent.use((model) => model.proxy.decor)
-    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
             salary: state.salary + this.state._salary,
@@ -131,7 +129,7 @@ export class StaffModel extends Model<
     }
 
     @StateAgent.use((model) => model.proxy.child.subordinates.decor)
-    private _checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+    private _checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
             _salary: this.state._salary,

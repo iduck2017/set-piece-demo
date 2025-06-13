@@ -1,19 +1,16 @@
 import { Model, Props, StateAgent } from "set-piece";
 import { StaffModel } from "./staff";
 import { EmotionType, GenderType } from "./common";
-import { FeatureModel } from "./feature";
 import { DeepReadonly } from "utility-types";
 
 export namespace DemoModel {
-    export type P = StaffModel;
-
-    export type E = { 
+    export type Event = { 
         onPlay: void 
         onHello: DemoModel,
         onCount: number,
     };
     
-    export type S = { 
+    export type State = { 
         price: number,
         readonly name: string,
         gender: GenderType
@@ -23,13 +20,13 @@ export namespace DemoModel {
         location: { x: number, y: number }
     };
     
-    export type C = {
+    export type Child = {
         foo: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
     }
     
-    export type R = { 
+    export type Refer = { 
         foo?: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
@@ -37,11 +34,11 @@ export namespace DemoModel {
 }
 
 export class DemoModel extends Model<
-    DemoModel.P,
-    DemoModel.E,
-    DemoModel.S,
-    DemoModel.C,
-    DemoModel.R
+    StaffModel,
+    DemoModel.Event,
+    DemoModel.State,
+    DemoModel.Child,
+    DemoModel.Refer
 > {
     testState() {
         const name: string = this.state.name;
@@ -94,7 +91,7 @@ export class DemoModel extends Model<
     }
 
     @StateAgent.use(model => model.proxy.decor)
-    checkState(target: DemoModel, state: DeepReadonly<DemoModel.S>) {
+    checkState(target: DemoModel, state: DeepReadonly<DemoModel.State>) {
         return {
             ...state,
             price: state.price + 100,
@@ -102,9 +99,9 @@ export class DemoModel extends Model<
     }
 
     constructor(props?: Props<
-        DemoModel.S,
-        DemoModel.C,
-        DemoModel.R
+        DemoModel.State,
+        DemoModel.Child,
+        DemoModel.Refer
     >) {
         super({
             ...props,

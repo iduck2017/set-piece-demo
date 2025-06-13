@@ -7,16 +7,14 @@ import { IncidentModel } from "./incident";
 
 
 export namespace IngSocModel {
-    export type P = never;
-    
-    export type E = {};
+    export type Event = {};
 
-    export type S = { 
+    export type State = { 
         asset: number;
         name: string;
     };
 
-    export type C = {
+    export type Child = {
         minipax: StaffModel;
         miniplenty: StaffModel;
         miniluv: StaffModel;
@@ -24,22 +22,22 @@ export namespace IngSocModel {
         incidents: IncidentModel[];
     }
     
-    export type R = {}
+    export type Refer = {}
 }
 
 
 @StoreService.is('ing-soc')
 export class IngSocModel extends Model<
-    IngSocModel.P,
-    IngSocModel.E,
-    IngSocModel.S,
-    IngSocModel.C,
-    IngSocModel.R
+    never,
+    IngSocModel.Event,
+    IngSocModel.State,
+    IngSocModel.Child,
+    IngSocModel.Refer
 > {
     constructor(props?: Props<
-        IngSocModel.S,
-        IngSocModel.C,
-        IngSocModel.R
+        IngSocModel.State,
+        IngSocModel.Child,
+        IngSocModel.Refer
     >) {
         super({
             ...props,

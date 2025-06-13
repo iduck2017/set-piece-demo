@@ -14,7 +14,7 @@ export class PromotionModel extends FeatureModel {
     }
 
     @StateAgent.use(model => model.route.parent?.proxy.decor)
-    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.S>) {
+    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
         console.log('promote', state.salary)
         return {
             ...state,
