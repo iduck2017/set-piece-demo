@@ -20,7 +20,7 @@ export class DepressionModel extends IncidentModel<
 > {
     constructor(props?: Props) {
         super({
-            ...props,
+            uuid: props?.uuid,
             state: { level: 1, ...props?.state },
             child: { ...props?.child },
             refer: { ...props?.refer }
@@ -31,7 +31,7 @@ export class DepressionModel extends IncidentModel<
     @StateAgent.use((model) => model.route.parent?.proxy.child.minitrue.decor)
     @StateAgent.use((model) => model.route.parent?.proxy.child.minipax.decor)
     @StateAgent.use((model) => model.route.parent?.proxy.child.miniluv.decor)
-    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
+    private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
             _salary: state._salary - 10,

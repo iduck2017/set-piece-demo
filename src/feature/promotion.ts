@@ -6,7 +6,7 @@ import { DeepReadonly } from "utility-types";
 export class PromotionModel extends FeatureModel {
     constructor(props?: Props) {
         super({
-            ...props,
+            uuid: props?.uuid,
             state: {},
             child: { ...props?.child },
             refer: { ...props?.refer }
@@ -14,7 +14,7 @@ export class PromotionModel extends FeatureModel {
     }
 
     @StateAgent.use(model => model.route.parent?.proxy.decor)
-    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
+    private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         console.log('promote', state.salary)
         return {
             ...state,

@@ -68,10 +68,10 @@ export class DemoModel extends Model<
         const bar: DemoModel | undefined = this.draft.child.bar;
         const baz: DemoModel[] = this.draft.child.baz;
 
-        this.draft.child.foo = new DemoModel();
-        this.draft.child.bar = new DemoModel();
-        this.draft.child.baz = [new DemoModel()];
-        this.draft.child.baz.push(new DemoModel());
+        this.draft.child.foo = new DemoModel({});
+        this.draft.child.bar = new DemoModel({});
+        this.draft.child.baz = [new DemoModel({})];
+        this.draft.child.baz.push(new DemoModel({}));
         
 
         const foo_2: DemoModel | undefined = this.draft.refer.foo;
@@ -79,32 +79,32 @@ export class DemoModel extends Model<
         const bar_2: DemoModel | undefined = this.draft.refer.bar;
         const baz_2: DemoModel[] | undefined = this.draft.refer.baz;
 
-        this.draft.refer.foo = new DemoModel();
-        this.draft.refer.bar = new DemoModel();
-        this.draft.refer.baz = [new DemoModel()];
-        this.draft.refer.baz.push(new DemoModel());
+        this.draft.refer.foo = new DemoModel({});
+        this.draft.refer.bar = new DemoModel({});
+        this.draft.refer.baz = [new DemoModel({})];
+        this.draft.refer.baz.push(new DemoModel({}));
 
         this.event.onHello(this)
-        this.event.onHello(new DemoModel());
+        this.event.onHello(new DemoModel({}));
         this.event.onCount(100);
         this.event.onPlay();
     }
 
     @StateAgent.use(model => model.proxy.decor)
-    checkState(target: DemoModel, state: DeepReadonly<DemoModel.State>) {
+    checkState(model: DemoModel, state: DeepReadonly<DemoModel.State>) {
         return {
             ...state,
             price: state.price + 100,
         }
     }
 
-    constructor(props?: Props<
+    constructor(props: Props<
         DemoModel.State,
         DemoModel.Child,
         DemoModel.Refer
     >) {
         super({
-            ...props,
+            uuid: props?.uuid,
             state: {
                 name: '',
                 price: 0,
@@ -116,8 +116,8 @@ export class DemoModel extends Model<
                 ...props?.state,
             },
             child: { 
-                foo: new DemoModel(),
-                bar: new DemoModel(),
+                foo: new DemoModel({}),
+                bar: new DemoModel({}),
                 baz: [],
                 ...props?.child
             },

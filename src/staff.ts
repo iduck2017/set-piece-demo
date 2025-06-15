@@ -1,11 +1,9 @@
 import { GenderType } from "@/common";
 import { DebugService, EventAgent, Model, OnStateChange, Props, StateAgent, StoreService, TranxService } from "set-piece";
 import { IngSocModel } from "./ing-soc";
-import { DemoModel } from "./demo";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
 import { DeepReadonly } from "utility-types";
-
 
 export namespace StaffModel {
     export type Event = { 
@@ -51,7 +49,7 @@ export class StaffModel extends Model<
         StaffModel.Refer
     >) {
         super({
-            ...props,
+            uuid: props?.uuid,
             state: { 
                 name: 'John Doe', 
                 gender: GenderType.MALE, 
@@ -85,7 +83,7 @@ export class StaffModel extends Model<
     }
 
     @EventAgent.use((model) => model.proxy.child.subordinates.event.onApply)
-    private handleApply(target: StaffModel, event: StaffModel) {
+    private handleApply(model: StaffModel, event: StaffModel) {
         this.event.onApply(event);
     }
 
@@ -121,7 +119,7 @@ export class StaffModel extends Model<
     }
 
     @StateAgent.use((model) => model.proxy.decor)
-    private checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
+    private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
             salary: state.salary + this.state._salary,
@@ -129,7 +127,7 @@ export class StaffModel extends Model<
     }
 
     @StateAgent.use((model) => model.proxy.child.subordinates.decor)
-    private _checkSalary(target: StaffModel, state: DeepReadonly<StaffModel.State>) {
+    private _checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
             _salary: this.state._salary,
@@ -137,7 +135,7 @@ export class StaffModel extends Model<
     }
 
     @EventAgent.use((model) => model.proxy.event.onStateChange)
-    private handleStateChange(target: StaffModel, event: OnStateChange<StaffModel>) {
+    private handleStateChange(model: StaffModel, event: OnStateChange<StaffModel>) {
         const prev = event.prev._salary;
         const next = event.next._salary;
         if (prev !== next) {

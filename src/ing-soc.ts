@@ -1,4 +1,4 @@
-import { DebugService, EventAgent, Model, OnChildChange, Props, StateAgent, StoreService, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, OnChildChange, Props, StoreService, TranxService } from "set-piece";
 import { StaffModel } from "./staff";
 import { GenderType } from "@/common";
 import { DepressionModel } from "./incident/depression";
@@ -40,7 +40,7 @@ export class IngSocModel extends Model<
         IngSocModel.Refer
     >) {
         super({
-            ...props,
+            uuid: props?.uuid,
             state: { 
                 name: 'Ing Soc', 
                 asset: 100_000, 
@@ -144,7 +144,7 @@ export class IngSocModel extends Model<
     @EventAgent.use((model) => model.proxy.child.miniplenty.event.onApply)
     @TranxService.use()
     @DebugService.log()
-    private handleApply(target: unknown, event: StaffModel) {
+    private handleApply(model: unknown, event: StaffModel) {
         const value = event.state.value - event.state.salary;
         const result = this.income(value);
         if (result > value) event.income(-result);
