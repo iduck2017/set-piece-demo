@@ -1,4 +1,4 @@
-import { Model, Props, StateAgent } from "set-piece";
+import { Model, StateAgent } from "set-piece";
 import { StaffModel } from "./staff";
 import { EmotionType, GenderType } from "./common";
 import { DeepReadonly } from "utility-types";
@@ -98,11 +98,7 @@ export class DemoModel extends Model<
         }
     }
 
-    constructor(props: Props<
-        DemoModel.State,
-        DemoModel.Child,
-        DemoModel.Refer
-    >) {
+    constructor(props: DemoModel['props']) {
         super({
             uuid: props?.uuid,
             state: {

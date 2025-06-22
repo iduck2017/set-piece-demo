@@ -3,7 +3,7 @@ import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
 import { RouteAgent } from "set-piece";
 
-test.skip('route', () => {
+test('route', () => {
     
     const ingsoc = new IngSocModel();
 

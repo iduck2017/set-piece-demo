@@ -1,5 +1,5 @@
-import { DebugService, EventAgent, Model, OnChildChange, Props, StoreService, TranxService } from "set-piece";
-import { StaffModel } from "./staff";
+import { DebugService, EventAgent, Model, StoreService, TranxService } from "set-piece";
+import { StaffModel } from "./staff";   
 import { GenderType } from "@/common";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
@@ -34,11 +34,7 @@ export class IngSocModel extends Model<
     IngSocModel.Child,
     IngSocModel.Refer
 > {
-    constructor(props?: Props<
-        IngSocModel.State,
-        IngSocModel.Child,
-        IngSocModel.Refer
-    >) {
+    constructor(props?: IngSocModel['props']) {
         super({
             uuid: props?.uuid,
             state: { 

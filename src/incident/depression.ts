@@ -1,5 +1,5 @@
 import { IngSocModel } from "@/ing-soc";
-import { Model, Props, StateAgent } from "set-piece";
+import { Model, StateAgent } from "set-piece";
 import { StaffModel } from "@/staff";
 import { IncidentModel } from ".";
 import { DeepReadonly } from "utility-types";
@@ -18,7 +18,7 @@ export class DepressionModel extends IncidentModel<
     DepressionModel.Child,
     DepressionModel.Refer
 > {
-    constructor(props?: Props) {
+    constructor(props?: DepressionModel['props']) {
         super({
             uuid: props?.uuid,
             state: { level: 1, ...props?.state },

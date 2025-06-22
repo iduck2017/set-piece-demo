@@ -1,5 +1,5 @@
 import { GenderType } from "@/common";
-import { DebugService, EventAgent, Model, OnStateChange, Props, StateAgent, StoreService, TranxService } from "set-piece";
+import { DebugService, EventAgent, Model, Event, StateAgent, StoreService, TranxService } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
@@ -43,11 +43,7 @@ export class StaffModel extends Model<
 > {
     declare public draft;
 
-    constructor(props: Props<
-        StaffModel.State,
-        StaffModel.Child,
-        StaffModel.Refer
-    >) {
+    constructor(props: StaffModel['props']) {
         super({
             uuid: props?.uuid,
             state: { 
@@ -135,7 +131,7 @@ export class StaffModel extends Model<
     }
 
     @EventAgent.use((model) => model.proxy.event.onStateChange)
-    private handleStateChange(model: StaffModel, event: OnStateChange<StaffModel>) {
+    private handleStateChange(model: StaffModel, event: Event.OnStateChange<StaffModel>) {
         const prev = event.prev._salary;
         const next = event.next._salary;
         if (prev !== next) {

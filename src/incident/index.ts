@@ -1,5 +1,4 @@
 import { IngSocModel } from "@/ing-soc";
-import { StaffModel } from "@/staff";
 import { Model } from "set-piece";
 
 

@@ -1,4 +1,4 @@
-import { Model, Props, StateAgent } from "set-piece";
+import { Model, StateAgent } from "set-piece";
 import { IncidentModel } from ".";
 import { IngSocModel } from "../ing-soc";
 import { StaffModel } from "@/staff";
@@ -18,7 +18,7 @@ export class CorruptionModel extends IncidentModel<
     CorruptionModel.Child,
     CorruptionModel.Refer
 > {
-    constructor(props?: Props) {
+    constructor(props?: CorruptionModel['props']) {
         super({
             uuid: props?.uuid,
             state: {},
