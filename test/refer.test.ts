@@ -3,6 +3,10 @@ import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
 import { RouteUtil } from "set-piece";
 
+console.log = () => undefined
+console.group = () => undefined
+console.groupEnd = () => undefined
+
 describe('refer', () => {
         
     const ingsoc = new IngSocModel();
