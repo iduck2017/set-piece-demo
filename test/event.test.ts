@@ -1,4 +1,4 @@
-import { RouteAgent } from "set-piece";
+import { RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
 import { StaffModel } from "../src/staff";
 import { GenderType } from "@/common";
@@ -44,7 +44,7 @@ describe('event', () => {
     })
 
     test('boot', () => {
-        RouteAgent.boot(ingsoc);
+        RouteUtil.boot(ingsoc);
         winston.apply();
         expect(winston.state.asset).toBe(110);
         expect(ingsoc.state.asset).toBe(assets + 90);

@@ -1,5 +1,5 @@
 import { IngSocModel } from "@/ing-soc";
-import { Model, StateAgent } from "set-piece";
+import { Model, StateUtil } from "set-piece";
 import { StaffModel } from "@/staff";
 import { IncidentModel } from ".";
 import { DeepReadonly } from "utility-types";
@@ -9,10 +9,13 @@ export namespace DepressionModel {
     export type State = { readonly level: number};
     export type Child = {};
     export type Refer = {};
+    export type Route = {
+        ingsoc: IngSocModel
+    }
 }
 
 export class DepressionModel extends IncidentModel<
-    IngSocModel,
+    DepressionModel.Route,
     DepressionModel.Event,
     DepressionModel.State,
     DepressionModel.Child,
@@ -23,14 +26,17 @@ export class DepressionModel extends IncidentModel<
             uuid: props?.uuid,
             state: { level: 1, ...props?.state },
             child: { ...props?.child },
-            refer: { ...props?.refer }
+            refer: { ...props?.refer },
+            route: {
+                ingsoc: [1, IngSocModel]
+            }
         })
     }
     
-    @StateAgent.use((model) => model.route.parent?.proxy.child.miniplenty.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.minitrue.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.minipax.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.miniluv.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniplenty.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minitrue.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniluv.decor)
     private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,

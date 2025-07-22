@@ -1,7 +1,6 @@
 import { GenderType } from "@/common";
 import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
-import { RouteAgent } from "set-piece";
 
 test('route', () => {
     

@@ -1,7 +1,8 @@
-import { Model, StateAgent } from "set-piece";
+import { Model, StateUtil } from "set-piece";
 import { StaffModel } from "./staff";
 import { EmotionType, GenderType } from "./common";
 import { DeepReadonly } from "utility-types";
+import { IngSocModel } from "./ing-soc";
 
 export namespace DemoModel {
     export type Event = { 
@@ -9,7 +10,6 @@ export namespace DemoModel {
         onHello: DemoModel,
         onCount: number,
     };
-    
     export type State = { 
         price: number,
         readonly name: string,
@@ -19,22 +19,23 @@ export namespace DemoModel {
         tags: string[]
         location: { x: number, y: number }
     };
-    
     export type Child = {
         foo: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
     }
-    
     export type Refer = { 
         foo?: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
     }
+    export type Route = {
+        ingsoce: IngSocModel
+    }
 }
 
 export class DemoModel extends Model<
-    StaffModel,
+    DemoModel.Route,
     DemoModel.Event,
     DemoModel.State,
     DemoModel.Child,
@@ -49,7 +50,6 @@ export class DemoModel extends Model<
         const isAlive: boolean = this.state.isAlive;
         const tags: ReadonlyArray<string> = this.state.tags;
         const location: { x: number, y: number } = this.state.location;
-
 
         // this.state.location.x += 100;
         // this.state.emotion = EmotionType.HAPPY;
@@ -90,7 +90,7 @@ export class DemoModel extends Model<
         this.event.onPlay();
     }
 
-    @StateAgent.use(model => model.proxy.decor)
+    @StateUtil.on(model => model.proxy.decor)
     checkState(model: DemoModel, state: DeepReadonly<DemoModel.State>) {
         return {
             ...state,
@@ -119,6 +119,9 @@ export class DemoModel extends Model<
             },
             refer: {
                 baz: [],
+            },
+            route: {
+                ingsoce: [1, IngSocModel]
             }
         })
     }

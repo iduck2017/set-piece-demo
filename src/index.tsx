@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { DebugService, Model, RouteAgent, StoreService } from "set-piece";
+import { DebugUtil, Model, RouteUtil, StoreUtil } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { StaffModel } from "./staff";
 import { GenderType } from "./common";
@@ -15,19 +15,19 @@ export class AppService {
 
     private constructor() {}
 
-    @DebugService.log()
+    @DebugUtil.log()
     public static boot() {
         const ingsoc = new IngSocModel();
         console.log('create', ingsoc);
         ingsoc.debug();
-        AppService._rootModel = RouteAgent.boot(ingsoc);
+        AppService._rootModel = RouteUtil.boot(ingsoc);
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
         createRoot(AppService._rootView).render(<h1>Hello World</h1>);
     }
 
-    @DebugService.log()
+    @DebugUtil.log()
     public static test() {
         const ingsoc = AppService._rootModel;
         if (!ingsoc) return;
@@ -69,7 +69,7 @@ export class AppService {
 
         winston.debug()
         ingsoc.debug()
-        console.log(StoreService.save(ingsoc))
+        console.log(StoreUtil.save(ingsoc))
     }
 }
 

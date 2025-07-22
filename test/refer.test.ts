@@ -1,7 +1,7 @@
 import { GenderType } from "@/common";
 import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
-import { RouteAgent } from "set-piece";
+import { RouteUtil } from "set-piece";
 
 describe('refer', () => {
         

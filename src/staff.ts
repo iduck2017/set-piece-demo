@@ -1,5 +1,5 @@
 import { GenderType } from "@/common";
-import { DebugService, EventAgent, Model, Event, StateAgent, StoreService, TranxService } from "set-piece";
+import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
@@ -10,7 +10,6 @@ export namespace StaffModel {
         onApply: StaffModel, 
         onEarn: StaffModel 
     };
-
     export type State = { 
         salary: number; 
         readonly _salary: number;
@@ -21,21 +20,22 @@ export namespace StaffModel {
         location: { x: number, y: number }
         tags: string[]
     };
-
     export type Child = { 
         subordinates: StaffModel[]
         features: FeatureModel[]
     };
-
     export type Refer = { 
         spouse?: StaffModel 
         friends: StaffModel[]
     };
+    export type Route = {
+        ingsoc: IngSocModel
+    }
 }
 
-@StoreService.is('staff')
+@StoreUtil.is('staff')
 export class StaffModel extends Model<
-    IngSocModel | StaffModel,
+    StaffModel.Route,
     StaffModel.Event,
     StaffModel.State,
     StaffModel.Child,
@@ -65,6 +65,9 @@ export class StaffModel extends Model<
             refer: {
                 friends: [],
                 ...props?.refer
+            },
+            route: {
+                ingsoc: [1, IngSocModel]
             }
         })
     }
@@ -73,18 +76,18 @@ export class StaffModel extends Model<
         return this.state.name;
     }
 
-    @DebugService.log()
+    @DebugUtil.log()
     public apply() {
         this.event.onApply(this);
     }
 
-    @EventAgent.use((model) => model.proxy.child.subordinates.event.onApply)
+    @EventUtil.on((model) => model.proxy.child.subordinates.event.onApply)
     private handleApply(model: StaffModel, event: StaffModel) {
         this.event.onApply(event);
     }
 
 
-    @DebugService.log()
+    @DebugUtil.log()
     public income(value: number): number {
         console.log('prev', this.state.asset)
         if (this.draft.state.asset + value < 0) {
@@ -96,7 +99,7 @@ export class StaffModel extends Model<
     }
 
 
-    @DebugService.log()
+    @DebugUtil.log()
     public promote() {
         console.log(this.draft.state.salary, this.state.salary)
         const promotion = new PromotionModel();
@@ -106,7 +109,7 @@ export class StaffModel extends Model<
     }
 
     
-    @DebugService.log()
+    @DebugUtil.log()
     public demote() {
         const features = this.draft.child.features;
         const index = features.findIndex((feature) => feature instanceof PromotionModel);
@@ -114,7 +117,7 @@ export class StaffModel extends Model<
         features.splice(index, 1);
     }
 
-    @StateAgent.use((model) => model.proxy.decor)
+    @StateUtil.on((model) => model.proxy.decor)
     private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
@@ -122,7 +125,7 @@ export class StaffModel extends Model<
         }
     }
 
-    @StateAgent.use((model) => model.proxy.child.subordinates.decor)
+    @StateUtil.on((model) => model.proxy.child.subordinates.decor)
     private _checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
@@ -130,7 +133,7 @@ export class StaffModel extends Model<
         }
     }
 
-    @EventAgent.use((model) => model.proxy.event.onStateChange)
+    @EventUtil.on((model) => model.proxy.event.onStateChange)
     private handleStateChange(model: StaffModel, event: Event.OnStateChange<StaffModel>) {
         const prev = event.prev._salary;
         const next = event.next._salary;
@@ -139,22 +142,21 @@ export class StaffModel extends Model<
         }
     }
 
-    @DebugService.log((model) => model.name)
-    @TranxService.use()
+    @DebugUtil.log()
+    @TranxUtil.span()
     public hello(staff: StaffModel) {
         this.draft.refer.friends?.push(staff);
         console.log('friends', this.refer.friends?.map(item => item.name))
         return [...this.draft.refer.friends ?? []]
     }
 
-    @DebugService.log()
+    @DebugUtil.log()
     public remove(staff: StaffModel) {
         const index = this.child.subordinates.indexOf(staff);
         if (index === -1) return undefined;
         this.draft.child.subordinates.splice(index, 1);
         return staff;
     }
-
 
     private _pace: number = 0;
     public get pace() {

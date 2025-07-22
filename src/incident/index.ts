@@ -3,7 +3,7 @@ import { Model } from "set-piece";
 
 
 export abstract class IncidentModel<
-    P extends IngSocModel = IngSocModel,
+    P extends Model.Route = {},
     E extends Model.Event = {},
     S extends Model.State = {},
     C extends Model.Child = {},

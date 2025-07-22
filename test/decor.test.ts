@@ -1,7 +1,7 @@
 import { GenderType } from "@/common";
 import { IngSocModel } from "@/ing-soc";
 import { StaffModel } from "@/staff";
-import { RouteAgent } from "set-piece";
+import { RouteUtil } from "set-piece";
 
 console.log = () => undefined
 console.group = () => undefined
@@ -43,7 +43,7 @@ describe('decor', () => {
     })
 
     test('boot', () => {
-        RouteAgent.boot(ingsoc);
+        RouteUtil.boot(ingsoc);
         expect(winston.state.salary).toBe(20);
         expect(winston.draft.state.salary).toBe(10);
     })

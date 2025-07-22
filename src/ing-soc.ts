@@ -1,19 +1,16 @@
-import { DebugService, EventAgent, Model, StoreService, TranxService } from "set-piece";
+import { DebugUtil, EventUtil, Model, StoreUtil, TranxUtil } from "set-piece";
 import { StaffModel } from "./staff";   
 import { GenderType } from "@/common";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
 import { IncidentModel } from "./incident";
 
-
 export namespace IngSocModel {
     export type Event = {};
-
     export type State = { 
         asset: number;
         name: string;
     };
-
     export type Child = {
         minipax: StaffModel;
         miniplenty: StaffModel;
@@ -21,14 +18,14 @@ export namespace IngSocModel {
         minitrue: StaffModel;
         incidents: IncidentModel[];
     }
-    
     export type Refer = {}
+    export type Route = {}
 }
 
 
-@StoreService.is('ing-soc')
+@StoreUtil.is('ing-soc')
 export class IngSocModel extends Model<
-    never,
+    IngSocModel.Route,
     IngSocModel.Event,
     IngSocModel.State,
     IngSocModel.Child,
@@ -104,13 +101,12 @@ export class IngSocModel extends Model<
                 }),
                 ...props?.child 
             },
-            refer: { ...props?.refer }
+            refer: { ...props?.refer },
+            route: {}
         })
     }
 
-    
-
-    @DebugService.log()
+    @DebugUtil.log()
     public income(value: number): number {
         console.log('prev', this.state.asset)
         if (this.draft.state.asset + value < 0) {
@@ -122,7 +118,7 @@ export class IngSocModel extends Model<
     }
 
 
-    @DebugService.log()
+    @DebugUtil.log()
     public purge(next: StaffModel, prev: StaffModel) {
         if (this.draft.child.miniluv === prev) this.draft.child.miniluv = next;
         if (this.draft.child.minitrue === prev)  this.draft.child.minitrue = next;
@@ -134,12 +130,12 @@ export class IngSocModel extends Model<
         };
     }
 
-    @EventAgent.use((model) => model.proxy.child.miniluv.event.onApply)
-    @EventAgent.use((model) => model.proxy.child.minipax.event.onApply)
-    @EventAgent.use((model) => model.proxy.child.minitrue.event.onApply)
-    @EventAgent.use((model) => model.proxy.child.miniplenty.event.onApply)
-    @TranxService.use()
-    @DebugService.log()
+    @EventUtil.on((model) => model.proxy.child.miniluv.event.onApply)
+    @EventUtil.on((model) => model.proxy.child.minipax.event.onApply)
+    @EventUtil.on((model) => model.proxy.child.minitrue.event.onApply)
+    @EventUtil.on((model) => model.proxy.child.miniplenty.event.onApply)
+    @TranxUtil.span()
+    @DebugUtil.log()
     private handleApply(model: unknown, event: StaffModel) {
         const value = event.state.value - event.state.salary;
         const result = this.income(value);
@@ -147,8 +143,7 @@ export class IngSocModel extends Model<
         else event.income(event.state.salary);
     }
 
-
-    @DebugService.log()
+    @DebugUtil.log()
     public depress(flag: boolean) {
         let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
         console.log(this.child.minitrue.state.salary)
@@ -166,8 +161,7 @@ export class IngSocModel extends Model<
         console.log(this.child.minitrue.child.subordinates[1]?.state.salary)
     }
 
-
-    @DebugService.log()
+    @DebugUtil.log()
     public corrupt(flag: boolean) {
         console.log(this.draft.child.incidents)
         let index = this.draft.child.incidents.findIndex(item => item instanceof CorruptionModel);

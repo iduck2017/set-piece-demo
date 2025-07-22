@@ -1,4 +1,4 @@
-import { Model, StateAgent } from "set-piece";
+import { Model, StateUtil } from "set-piece";
 import { IncidentModel } from ".";
 import { IngSocModel } from "../ing-soc";
 import { StaffModel } from "@/staff";
@@ -9,10 +9,13 @@ export namespace CorruptionModel {
     export type State = {};
     export type Child = {};
     export type Refer = {};
+    export type Route = {
+        ingsoc: IngSocModel;
+    }
 }
 
 export class CorruptionModel extends IncidentModel<
-    IngSocModel,
+    CorruptionModel.Route,
     CorruptionModel.Event,
     CorruptionModel.State,
     CorruptionModel.Child,
@@ -23,14 +26,17 @@ export class CorruptionModel extends IncidentModel<
             uuid: props?.uuid,
             state: {},
             child: { ...props?.child },
-            refer: { ...props?.refer }
+            refer: { ...props?.refer },
+            route: {
+                ingsoc: [1, IngSocModel],
+            }
         })
     }
 
-    @StateAgent.use((model) => model.route.parent?.proxy.child.miniplenty.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.minitrue.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.miniluv.decor)
-    @StateAgent.use((model) => model.route.parent?.proxy.child.minipax.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniplenty.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minitrue.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniluv.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
     private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
         return {
             ...state,
@@ -38,12 +44,11 @@ export class CorruptionModel extends IncidentModel<
         }
     }
 
-    @StateAgent.use((model) => model.route.parent?.proxy.decor)
+    @StateUtil.on((model) => model.route.ingsoc?.proxy.decor)
     private checkAsset(model: IngSocModel, state: IngSocModel.State) {
         return {
             ...state,
             asset: state.asset - 20000,
         }
     }
-
 }
