@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { DebugUtil, Model, RouteUtil, StoreUtil } from "set-piece";
+import { DebugUtil, LogLevel, Model, RouteUtil, StoreUtil } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { StaffModel } from "./staff";
 import { GenderType } from "./common";
@@ -17,10 +17,17 @@ export class AppService {
 
     @DebugUtil.log()
     public static boot() {
+        DebugUtil.level = LogLevel.INFO;
+        
         const ingsoc = new IngSocModel();
-        console.log('create', ingsoc);
-        ingsoc.debug();
+        const obrien = ingsoc.child.minitrue;
+        const winston = obrien.child.subordinates[0];
+        const julia = obrien.child.subordinates[1];
+
         AppService._rootModel = RouteUtil.boot(ingsoc);
+
+        console.log(winston?.state.salary);
+
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
         if (!AppService._rootView) return;
@@ -44,6 +51,7 @@ export class AppService {
             }
         });
 
+        console.log(obrien.refer.friends.map(item => item.name));
 
         const winston = obrien.child.subordinates[0];
         const julia = obrien.child.subordinates[1];
@@ -51,25 +59,30 @@ export class AppService {
         if (!winston) return;
         if (!julia) return;
 
+        // console.log(winston.state.salary);
+        // winston.promote();
+        // console.log(winston.state.salary);
+        // winston.promote();
+        // console.log(winston.state.salary);
+        // ingsoc.depress(true);
+        // console.log(winston.state._salary);
+        // console.log(winston.state.salary);
+        // console.log(ingsoc);
+
         winston.hello(goldstein);
         console.log('friends', winston.refer.friends?.map(item => item.name))
-
         winston.hello(julia);
         console.log('friends', winston.refer.friends?.map(item => item.name))
-    
-        console.log('salary', winston.state.salary);
-        winston.promote();
-        console.log('salary', winston.state.salary)
-
         obrien.remove(julia);
         console.log('sub', obrien.child.subordinates.map(item => item.name));
-        console.log(winston);
+        console.log('friends', winston.refer.friends?.map(item => item.name))
+        // console.log(winston);
 
-        winston.demote()
+        // winston.demote()
 
-        winston.debug()
-        ingsoc.debug()
-        console.log(StoreUtil.save(ingsoc))
+        // winston.debug()
+        // ingsoc.debug()
+        // console.log(StoreUtil.save(ingsoc))
     }
 }
 

@@ -1,7 +1,7 @@
 import { Model, StateUtil } from "set-piece";
 import { IncidentModel } from ".";
 import { IngSocModel } from "../ing-soc";
-import { StaffModel } from "@/staff";
+import { StaffModel } from "../staff";
 import { DeepReadonly } from "utility-types";
 
 export namespace CorruptionModel {
@@ -9,13 +9,9 @@ export namespace CorruptionModel {
     export type State = {};
     export type Child = {};
     export type Refer = {};
-    export type Route = {
-        ingsoc: IngSocModel;
-    }
 }
 
 export class CorruptionModel extends IncidentModel<
-    CorruptionModel.Route,
     CorruptionModel.Event,
     CorruptionModel.State,
     CorruptionModel.Child,
@@ -27,9 +23,6 @@ export class CorruptionModel extends IncidentModel<
             state: {},
             child: { ...props?.child },
             refer: { ...props?.refer },
-            route: {
-                ingsoc: [1, IngSocModel],
-            }
         })
     }
 

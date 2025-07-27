@@ -1,6 +1,6 @@
 import { DebugUtil, EventUtil, Model, StoreUtil, TranxUtil } from "set-piece";
 import { StaffModel } from "./staff";   
-import { GenderType } from "@/common";
+import { GenderType } from "./common";
 import { DepressionModel } from "./incident/depression";
 import { CorruptionModel } from "./incident/corruption";
 import { IncidentModel } from "./incident";
@@ -19,19 +19,26 @@ export namespace IngSocModel {
         incidents: IncidentModel[];
     }
     export type Refer = {}
-    export type Route = {}
 }
 
 
 @StoreUtil.is('ing-soc')
 export class IngSocModel extends Model<
-    IngSocModel.Route,
     IngSocModel.Event,
     IngSocModel.State,
     IngSocModel.Child,
     IngSocModel.Refer
 > {
     constructor(props?: IngSocModel['props']) {
+        const winston = new StaffModel({
+            state: {
+                name: 'Winston Smith',
+                salary: 10,
+                asset: 100,
+                value: 100,
+                gender: GenderType.MALE,
+            },
+        });
         super({
             uuid: props?.uuid,
             state: { 
@@ -51,15 +58,7 @@ export class IngSocModel extends Model<
                     },
                     child: {
                         subordinates: [
-                            new StaffModel({
-                                state: {
-                                    name: 'Winston Smith',
-                                    salary: 10,
-                                    asset: 100,
-                                    value: 100,
-                                    gender: GenderType.MALE,
-                                },
-                            }),
+                            winston,
                             new StaffModel({
                                 state: {
                                     name: 'Julia',
@@ -71,6 +70,9 @@ export class IngSocModel extends Model<
                             })
                         ] 
                     },
+                    refer: {
+                        friends: [winston]
+                    }
                 }),
                 minipax: new StaffModel({ 
                     state: { 
@@ -102,7 +104,6 @@ export class IngSocModel extends Model<
                 ...props?.child 
             },
             refer: { ...props?.refer },
-            route: {}
         })
     }
 
@@ -146,9 +147,6 @@ export class IngSocModel extends Model<
     @DebugUtil.log()
     public depress(flag: boolean) {
         let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
-        console.log(this.child.minitrue.state.salary)
-        console.log(this.child.minitrue.child.subordinates[0]?.state.salary)
-        console.log(this.child.minitrue.child.subordinates[1]?.state.salary)
         if (flag) {
             if (index !== -1) return;
             this.draft.child.incidents.push(new DepressionModel());
@@ -156,14 +154,10 @@ export class IngSocModel extends Model<
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);
         }
-        console.log(this.child.minitrue.state.salary)
-        console.log(this.child.minitrue.child.subordinates[0]?.state.salary)
-        console.log(this.child.minitrue.child.subordinates[1]?.state.salary)
     }
 
     @DebugUtil.log()
     public corrupt(flag: boolean) {
-        console.log(this.draft.child.incidents)
         let index = this.draft.child.incidents.findIndex(item => item instanceof CorruptionModel);
         if (flag) {
             if (index !== -1) return;
@@ -172,8 +166,6 @@ export class IngSocModel extends Model<
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);
         }
-        console.log(this.draft.state.asset, this.state.asset)
-        console.log(this.child.minitrue.state.salary)
     }
 
 }

@@ -29,13 +29,9 @@ export namespace DemoModel {
         bar?: DemoModel,
         baz: DemoModel[],
     }
-    export type Route = {
-        ingsoce: IngSocModel
-    }
 }
 
 export class DemoModel extends Model<
-    DemoModel.Route,
     DemoModel.Event,
     DemoModel.State,
     DemoModel.Child,
@@ -120,9 +116,6 @@ export class DemoModel extends Model<
             refer: {
                 baz: [],
             },
-            route: {
-                ingsoce: [1, IngSocModel]
-            }
         })
     }
 

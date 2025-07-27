@@ -1,13 +1,10 @@
-import { GenderType } from "@/common";
-import { IngSocModel } from "@/ing-soc";
-import { StaffModel } from "@/staff";
-
-console.log = () => undefined
-console.group = () => undefined
-console.groupEnd = () => undefined
+import { GenderType } from "../src/common";
+import { IngSocModel } from "../src/ing-soc";
+import { StaffModel } from "../src/staff";
+import { boot } from "./boot";
 
 describe('child', () => {
-    
+    boot();
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;

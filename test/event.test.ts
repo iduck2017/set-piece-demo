@@ -1,13 +1,11 @@
 import { RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
 import { StaffModel } from "../src/staff";
-import { GenderType } from "@/common";
-
-console.log = () => undefined
-console.group = () => undefined
-console.groupEnd = () => undefined
+import { GenderType } from "../src/common";
+import { boot } from "./boot";
 
 describe('event', () => {
+    boot();
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;

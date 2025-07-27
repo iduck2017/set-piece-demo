@@ -1,10 +1,8 @@
 import { IngSocModel } from "../src/ing-soc"
-
-console.log = () => undefined
-console.group = () => undefined
-console.groupEnd = () => undefined
+import { boot } from "./boot";
 
 describe('state', () => {
+    boot();
     const ingsoc = new IngSocModel();
     const winston = ingsoc.child.minitrue.child.subordinates[0];
     const julia = ingsoc.child.minitrue.child.subordinates[1];

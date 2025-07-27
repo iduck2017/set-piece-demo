@@ -1,14 +1,11 @@
-import { GenderType } from "@/common";
-import { IngSocModel } from "@/ing-soc";
-import { StaffModel } from "@/staff";
+import { GenderType } from "../src/common";
+import { IngSocModel } from "../src/ing-soc";
+import { StaffModel } from "../src/staff";
 import { RouteUtil } from "set-piece";
-
-console.log = () => undefined
-console.group = () => undefined
-console.groupEnd = () => undefined
-
+import { boot } from "./boot";
 
 describe('decor', () => {
+    boot();
     const ingsoc = new IngSocModel();
     const obrien = ingsoc.child.minitrue;
     const goldstein = new StaffModel({

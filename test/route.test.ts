@@ -1,13 +1,12 @@
-import { GenderType } from "@/common";
-import { IngSocModel } from "@/ing-soc";
-import { StaffModel } from "@/staff";
+import { GenderType } from "../src/common";
+import { IngSocModel } from "../src/ing-soc";
+import { StaffModel } from "../src/staff";
+import { boot } from "./boot";
 
-console.log = () => undefined
-console.group = () => undefined
-console.groupEnd = () => undefined
 
 describe('route', () => {
     
+    boot();
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;
@@ -63,8 +62,8 @@ describe('route', () => {
     })
 
     test('boot', () => {
-        expect(winston.route.root).toBe(ingsoc);
-        expect(obrien.route.root).toBe(ingsoc);
-        expect(ingsoc.route.root).toBe(ingsoc);
+        expect(winston.route.origin).toBe(ingsoc);
+        expect(obrien.route.origin).toBe(ingsoc);
+        expect(ingsoc.route.origin).toBe(ingsoc);
     })
 })

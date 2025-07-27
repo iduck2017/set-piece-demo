@@ -1,6 +1,5 @@
-import { IngSocModel } from "@/ing-soc";
-import { Model, StateUtil } from "set-piece";
-import { StaffModel } from "@/staff";
+import { DebugUtil, StateUtil } from "set-piece";
+import { StaffModel } from "../staff";
 import { IncidentModel } from ".";
 import { DeepReadonly } from "utility-types";
 
@@ -9,13 +8,9 @@ export namespace DepressionModel {
     export type State = { readonly level: number};
     export type Child = {};
     export type Refer = {};
-    export type Route = {
-        ingsoc: IngSocModel
-    }
 }
 
 export class DepressionModel extends IncidentModel<
-    DepressionModel.Route,
     DepressionModel.Event,
     DepressionModel.State,
     DepressionModel.Child,
@@ -27,9 +22,6 @@ export class DepressionModel extends IncidentModel<
             state: { level: 1, ...props?.state },
             child: { ...props?.child },
             refer: { ...props?.refer },
-            route: {
-                ingsoc: [1, IngSocModel]
-            }
         })
     }
     

@@ -1,5 +1,5 @@
-import { GenderType } from "@/common";
-import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil } from "set-piece";
+import { GenderType } from "./common";
+import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel } from "set-piece";
 import { IngSocModel } from "./ing-soc";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
@@ -28,14 +28,10 @@ export namespace StaffModel {
         spouse?: StaffModel 
         friends: StaffModel[]
     };
-    export type Route = {
-        ingsoc: IngSocModel
-    }
 }
 
 @StoreUtil.is('staff')
 export class StaffModel extends Model<
-    StaffModel.Route,
     StaffModel.Event,
     StaffModel.State,
     StaffModel.Child,
@@ -66,9 +62,6 @@ export class StaffModel extends Model<
                 friends: [],
                 ...props?.refer
             },
-            route: {
-                ingsoc: [1, IngSocModel]
-            }
         })
     }
 
@@ -101,11 +94,8 @@ export class StaffModel extends Model<
 
     @DebugUtil.log()
     public promote() {
-        console.log(this.draft.state.salary, this.state.salary)
         const promotion = new PromotionModel();
         this.draft.child.features.push(promotion);
-        console.log(this.draft.state.salary, this.state.salary)
-        console.log([...this.child.features])
     }
 
     
@@ -118,7 +108,9 @@ export class StaffModel extends Model<
     }
 
     @StateUtil.on((model) => model.proxy.decor)
+    @DebugUtil.log(LogLevel.WARN)
     private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
+        console.log(this.state.name, state.salary, this.state._salary)
         return {
             ...state,
             salary: state.salary + this.state._salary,
@@ -146,7 +138,6 @@ export class StaffModel extends Model<
     @TranxUtil.span()
     public hello(staff: StaffModel) {
         this.draft.refer.friends?.push(staff);
-        console.log('friends', this.refer.friends?.map(item => item.name))
         return [...this.draft.refer.friends ?? []]
     }
 
