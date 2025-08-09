@@ -62,8 +62,8 @@ describe('route', () => {
     })
 
     test('boot', () => {
-        expect(winston.route.origin).toBe(ingsoc);
-        expect(obrien.route.origin).toBe(ingsoc);
-        expect(ingsoc.route.origin).toBe(ingsoc);
+        expect(winston.route.root).toBe(ingsoc);
+        expect(obrien.route.root).toBe(ingsoc);
+        expect(ingsoc.route.root).toBe(ingsoc);
     })
 })
