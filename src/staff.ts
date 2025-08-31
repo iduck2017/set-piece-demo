@@ -1,18 +1,17 @@
-import { GenderType } from "./common";
+import { GenderType } from "./types";
 import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel } from "set-piece";
 import { IngSocModel } from "./ing-soc";
-import { FeatureModel } from "./feature";
+import { FeatureModel, FeatureProps } from "./feature";
 import { PromotionModel } from "./feature/promotion";
 import { DeepReadonly } from "utility-types";
 
-export namespace StaffModel {
-    export type Event = { 
-        onApply: StaffModel, 
-        onEarn: StaffModel 
+export namespace StaffProps {
+    export type E = { 
+        onWork: Event, 
+        onEarn: Event 
     };
-    export type State = { 
+    export type S = { 
         salary: number; 
-        readonly _salary: number;
         asset: number;  
         name: string; 
         value: number;
@@ -20,11 +19,11 @@ export namespace StaffModel {
         location: { x: number, y: number }
         tags: string[]
     };
-    export type Child = { 
+    export type C = { 
         subordinates: StaffModel[]
         features: FeatureModel[]
     };
-    export type Refer = { 
+    export type R = { 
         spouse?: StaffModel 
         friends: StaffModel[]
     };
@@ -32,10 +31,10 @@ export namespace StaffModel {
 
 @StoreUtil.is('staff')
 export class StaffModel extends Model<
-    StaffModel.Event,
-    StaffModel.State,
-    StaffModel.Child,
-    StaffModel.Refer
+    StaffProps.E,
+    StaffProps.S,
+    StaffProps.C,
+    StaffProps.R
 > {
     declare public draft;
 
@@ -43,24 +42,20 @@ export class StaffModel extends Model<
         super({
             uuid: props?.uuid,
             state: { 
-                name: 'John Doe', 
-                gender: GenderType.MALE, 
-                salary: 10, 
-                asset: 0, 
-                value: 0,
-                location: { x: 0, y: 0 },
-                tags: [],
-                ...props?.state, 
-                _salary: 0, 
+                name: props.state?.name ?? 'John Doe', 
+                gender: props.state?.gender ?? GenderType.MALE, 
+                salary: props.state?.salary ?? 10, 
+                asset: props.state?.asset ?? 0, 
+                value: props.state?.value ?? 0,
+                location: props.state?.location ?? { x: 0, y: 0 },
+                tags: props.state?.tags ?? [],
             },
             child: { 
-                features: [],
-                subordinates: [],
-                ...props?.child
+                features: props.child?.features ?? [],
+                subordinates: props.child?.subordinates ?? [],
             },
             refer: {
-                friends: [],
-                ...props?.refer
+                friends: props.refer?.friends ?? [],
             },
         })
     }
@@ -70,31 +65,23 @@ export class StaffModel extends Model<
     }
 
     @DebugUtil.log()
-    public apply() {
-        this.event.onApply(this);
+    public work() {
+        this.event.onWork(new Event({}));
     }
-
-    @EventUtil.on((model) => model.proxy.child.subordinates.event.onApply)
-    private handleApply(model: StaffModel, event: StaffModel) {
-        this.event.onApply(event);
-    }
-
 
     @DebugUtil.log()
     public income(value: number): number {
-        console.log('prev', this.state.asset)
         if (this.draft.state.asset + value < 0) {
             value = -this.draft.state.asset;
         }
         this.draft.state.asset += value;
-        console.log('next', this.state.asset)
         return value;
     }
 
 
     @DebugUtil.log()
     public promote() {
-        const promotion = new PromotionModel();
+        const promotion = new PromotionModel({});
         this.draft.child.features.push(promotion);
     }
 
@@ -105,33 +92,6 @@ export class StaffModel extends Model<
         const index = features.findIndex((feature) => feature instanceof PromotionModel);
         if (index === -1) return;
         features.splice(index, 1);
-    }
-
-    @StateUtil.on((model) => model.proxy.decor)
-    @DebugUtil.log(LogLevel.WARN)
-    private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
-        console.log(this.state.name, state.salary, this.state._salary)
-        return {
-            ...state,
-            salary: state.salary + this.state._salary,
-        }
-    }
-
-    @StateUtil.on((model) => model.proxy.child.subordinates.decor)
-    private _checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
-        return {
-            ...state,
-            _salary: this.state._salary,
-        }
-    }
-
-    @EventUtil.on((model) => model.proxy.event.onStateChange)
-    private handleStateChange(model: StaffModel, event: Event.OnStateChange<StaffModel>) {
-        const prev = event.prev._salary;
-        const next = event.next._salary;
-        if (prev !== next) {
-            this.reload();
-        }
     }
 
     @DebugUtil.log()

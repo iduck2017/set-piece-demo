@@ -1,13 +1,13 @@
-import { GenderType } from "../src/common";
+import { GenderType } from "../src/types";
 import { IngSocModel } from "../src/ing-soc";
-import { StaffModel } from "../src/staff";
+import { StaffModel, StaffProps } from "../src/staff";
 import { RouteUtil } from "set-piece";
 import { boot } from "./boot";
 
 describe('refer', () => {
         
     boot();
-    const ingsoc = new IngSocModel();
+    const ingsoc = new IngSocModel({});
 
     const obrien = ingsoc.child.minitrue;
     const aaronson = ingsoc.child.minipax

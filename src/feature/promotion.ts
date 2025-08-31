@@ -1,26 +1,22 @@
-import { DebugUtil, LogLevel, Model, StateUtil } from "set-piece";
-import { FeatureModel } from ".";
-import { StaffModel } from "../staff";
+import { DebugUtil, Decor, LogLevel, Model, StateUtil } from "set-piece";
+import { FeatureModel, FeatureProps } from ".";
+import { StaffModel, StaffProps } from "../staff";
 import { DeepReadonly } from "utility-types";
 
 export class PromotionModel extends FeatureModel {
-    constructor(props?: PromotionModel['props']) {
+    constructor(props: PromotionModel['props']) {
         super({
-            uuid: props?.uuid,
+            uuid: props.uuid,
             state: {},
-            child: { ...props?.child },
-            refer: { ...props?.refer },
+            child: {},
+            refer: {},
         })
     }
 
     @StateUtil.on(model => model.route.staff?.proxy.decor)
     @DebugUtil.log(LogLevel.WARN)
-    private checkSalary(model: StaffModel, state: DeepReadonly<StaffModel.State>) {
-        console.log('promote', state.salary)
-        return {
-            ...state,
-            salary: state.salary + 10,
-        }
+    private checkSalary(model: StaffModel, state: Decor<StaffProps.S>) {
+        state.current.salary += 10;
     }
 
 }

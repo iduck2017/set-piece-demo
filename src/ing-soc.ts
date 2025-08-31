@@ -1,35 +1,35 @@
-import { DebugUtil, EventUtil, Model, StoreUtil, TranxUtil } from "set-piece";
-import { StaffModel } from "./staff";   
-import { GenderType } from "./common";
-import { DepressionModel } from "./incident/depression";
-import { CorruptionModel } from "./incident/corruption";
+import { DebugUtil, Event, EventUtil, Model, StoreUtil, TranxUtil } from "set-piece";
+import { StaffModel, StaffProps } from "./staff";   
+import { GenderType } from "./types";
+import { DepressionModel, DepressionProps } from "./incident/depression";
+import { CorruptionModel, CorruptionProps } from "./incident/corruption";
 import { IncidentModel } from "./incident";
 
-export namespace IngSocModel {
-    export type Event = {};
-    export type State = { 
+export namespace IngSocProps {
+    export type E = {};
+    export type S = { 
         asset: number;
         name: string;
     };
-    export type Child = {
+    export type C = {
         minipax: StaffModel;
         miniplenty: StaffModel;
         miniluv: StaffModel;
         minitrue: StaffModel;
         incidents: IncidentModel[];
     }
-    export type Refer = {}
+    export type R = {}
 }
 
 
 @StoreUtil.is('ing-soc')
 export class IngSocModel extends Model<
-    IngSocModel.Event,
-    IngSocModel.State,
-    IngSocModel.Child,
-    IngSocModel.Refer
+    IngSocProps.E,
+    IngSocProps.S,
+    IngSocProps.C,
+    IngSocProps.R
 > {
-    constructor(props?: IngSocModel['props']) {
+    constructor(props: IngSocModel['props']) {
         const winston = new StaffModel({
             state: {
                 name: 'Winston Smith',
@@ -40,15 +40,14 @@ export class IngSocModel extends Model<
             },
         });
         super({
-            uuid: props?.uuid,
+            uuid: props.uuid,
             state: { 
-                name: 'Ing Soc', 
-                asset: 100_000, 
-                ...props?.state 
+                name: props.state?.name ?? 'Ing Soc', 
+                asset: props.state?.asset ?? 100_000, 
             },
             child: { 
-                incidents: [],
-                minitrue: new StaffModel({ 
+                incidents: props.child?.incidents ?? [],
+                minitrue: props.child?.minitrue ??new StaffModel({ 
                     state: { 
                         name: 'O\'Brien',
                         salary: 100,
@@ -74,7 +73,7 @@ export class IngSocModel extends Model<
                         friends: [winston]
                     }
                 }),
-                minipax: new StaffModel({ 
+                minipax: props.child?.minipax ?? new StaffModel({ 
                     state: { 
                         name: 'Aaronson',
                         salary: 100,
@@ -83,7 +82,7 @@ export class IngSocModel extends Model<
                         gender: GenderType.MALE,
                     }
                 }),
-                miniplenty: new StaffModel({
+                miniplenty: props.child?.miniplenty ?? new StaffModel({
                     state: {
                         name: 'Rutherford',
                         salary: 100,
@@ -92,7 +91,7 @@ export class IngSocModel extends Model<
                         gender: GenderType.MALE
                     }
                 }),
-                miniluv: new StaffModel({
+                miniluv: props.child?.miniluv ?? new StaffModel({
                     state: {
                         name: 'Jones',
                         salary: 100,
@@ -101,20 +100,17 @@ export class IngSocModel extends Model<
                         gender: GenderType.MALE,
                     }
                 }),
-                ...props?.child 
             },
-            refer: { ...props?.refer },
+            refer: {},
         })
     }
 
     @DebugUtil.log()
     public income(value: number): number {
-        console.log('prev', this.state.asset)
         if (this.draft.state.asset + value < 0) {
             value = -this.draft.state.asset;
         }
         this.draft.state.asset += value;
-        console.log('next', this.state.asset)
         return value;
     }
 
@@ -131,17 +127,13 @@ export class IngSocModel extends Model<
         };
     }
 
-    @EventUtil.on((model) => model.proxy.child.miniluv.event.onApply)
-    @EventUtil.on((model) => model.proxy.child.minipax.event.onApply)
-    @EventUtil.on((model) => model.proxy.child.minitrue.event.onApply)
-    @EventUtil.on((model) => model.proxy.child.miniplenty.event.onApply)
-    @TranxUtil.span()
+    @EventUtil.on((self) => self.proxy.all<StaffModel>(StaffModel).event.onWork)
     @DebugUtil.log()
-    private handleApply(model: unknown, event: StaffModel) {
-        const value = event.state.value - event.state.salary;
+    private onWork(that: StaffModel, event: Event) {
+        const value = that.state.value - that.state.salary;
         const result = this.income(value);
-        if (result > value) event.income(-result);
-        else event.income(event.state.salary);
+        if (result > value) that.income(-result);
+        else that.income(that.state.salary);
     }
 
     @DebugUtil.log()
@@ -149,7 +141,7 @@ export class IngSocModel extends Model<
         let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
         if (flag) {
             if (index !== -1) return;
-            this.draft.child.incidents.push(new DepressionModel());
+            this.draft.child.incidents.push(new DepressionModel({}));
         } else {
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);

@@ -2,8 +2,8 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { DebugUtil, LogLevel, Model, RouteUtil, StoreUtil } from "set-piece";
 import { IngSocModel } from "./ing-soc";
-import { StaffModel } from "./staff";
-import { GenderType } from "./common";
+import { StaffModel, StaffProps } from "./staff";
+import { GenderType } from "./types";
 
 export class AppService {
     private static _rootView?: HTMLElement;
@@ -17,16 +17,12 @@ export class AppService {
 
     @DebugUtil.log()
     public static boot() {
-        DebugUtil.level = LogLevel.INFO;
-        
-        const ingsoc = new IngSocModel();
+        const ingsoc = new IngSocModel({});
         const obrien = ingsoc.child.minitrue;
         const winston = obrien.child.subordinates[0];
         const julia = obrien.child.subordinates[1];
 
         AppService._rootModel = RouteUtil.boot(ingsoc);
-
-        console.log(winston?.state.salary);
 
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
@@ -51,38 +47,35 @@ export class AppService {
             }
         });
 
-        console.log(obrien.refer.friends.map(item => item.name));
-
         const winston = obrien.child.subordinates[0];
         const julia = obrien.child.subordinates[1];
 
         if (!winston) return;
         if (!julia) return;
 
-        // console.log(winston.state.salary);
-        // winston.promote();
-        // console.log(winston.state.salary);
-        // winston.promote();
-        // console.log(winston.state.salary);
-        // ingsoc.depress(true);
-        // console.log(winston.state._salary);
-        // console.log(winston.state.salary);
-        // console.log(ingsoc);
+        console.log(aaronson.state.salary);
+        console.log(aaronson.state.asset);
+        aaronson.work();
+        console.log(aaronson.state.asset);
+        aaronson.promote();
+        console.log(aaronson.state.salary)
+        winston.promote();
+        console.log(winston.state.salary);
+        ingsoc.depress(true);
+        console.log(winston.state.salary);
+        console.log(aaronson.state.salary);
 
-        winston.hello(goldstein);
-        console.log('friends', winston.refer.friends?.map(item => item.name))
-        winston.hello(julia);
-        console.log('friends', winston.refer.friends?.map(item => item.name))
-        obrien.remove(julia);
-        console.log('sub', obrien.child.subordinates.map(item => item.name));
-        console.log('friends', winston.refer.friends?.map(item => item.name))
-        // console.log(winston);
+        aaronson.demote();
+        console.log(aaronson.state.salary);
+        ingsoc.depress(false);
+        console.log(aaronson.state.salary);
+        console.log(winston.state.salary)
 
-        // winston.demote()
 
-        // winston.debug()
-        // ingsoc.debug()
-        // console.log(StoreUtil.save(ingsoc))
+        console.log('corrupt')
+        ingsoc.corrupt(true);
+        console.log(aaronson.state.salary)
+        console.log(ingsoc.state.asset)
     }
 }
 

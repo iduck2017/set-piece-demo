@@ -1,16 +1,14 @@
-import { Model, StateUtil } from "set-piece";
-import { StaffModel } from "./staff";
-import { EmotionType, GenderType } from "./common";
+import { Decor, Event, Model, StateUtil } from "set-piece";
+import { EmotionType, GenderType } from "./types";
 import { DeepReadonly } from "utility-types";
-import { IngSocModel } from "./ing-soc";
 
-export namespace DemoModel {
-    export type Event = { 
-        onPlay: void 
-        onHello: DemoModel,
-        onCount: number,
+export namespace DemoProps {
+    export type E = { 
+        onPlay: Event 
+        onHello: Event<{ target: DemoModel }>,
+        onCount: Event<{ value: number }>,
     };
-    export type State = { 
+    export type S = { 
         price: number,
         readonly name: string,
         gender: GenderType
@@ -19,12 +17,12 @@ export namespace DemoModel {
         tags: string[]
         location: { x: number, y: number }
     };
-    export type Child = {
+    export type C = {
         foo: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
     }
-    export type Refer = { 
+    export type R = { 
         foo?: DemoModel,
         bar?: DemoModel,
         baz: DemoModel[],
@@ -32,12 +30,40 @@ export namespace DemoModel {
 }
 
 export class DemoModel extends Model<
-    DemoModel.Event,
-    DemoModel.State,
-    DemoModel.Child,
-    DemoModel.Refer
+    DemoProps.E,
+    DemoProps.S,
+    DemoProps.C,
+    DemoProps.R
 > {
-    testState() {
+
+    constructor(props: DemoModel['props']) {
+        super({
+            uuid: props.uuid,
+            state: {
+                name: props.state?.name ?? '',
+                price: props.state?.price ?? 0,
+                emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
+                gender: props.state?.gender ?? GenderType.UNKNOWN,
+                isAlive: props.state?.isAlive ?? true,
+                tags: props.state?.tags ?? [],
+                location: props.state?.location ?? { x: 0, y: 0 },
+                ...props.state,
+            },
+            child: { 
+                foo: props.child?.foo ?? new DemoModel({}),
+                bar: props.child?.bar ?? new DemoModel({}),
+                baz: props.child?.baz ?? [],
+                ...props.child,
+            },
+            refer: {
+                baz: props.refer?.baz ?? [],
+                bar: props.refer?.bar,
+                ...props.refer,
+            },
+        })
+    }
+
+    test() {
         const name: string = this.state.name;
         // const name_2: number = this.state.name;
         const price: number = this.state.price;
@@ -80,43 +106,16 @@ export class DemoModel extends Model<
         this.draft.refer.baz = [new DemoModel({})];
         this.draft.refer.baz.push(new DemoModel({}));
 
-        this.event.onHello(this)
-        this.event.onHello(new DemoModel({}));
-        this.event.onCount(100);
-        this.event.onPlay();
+        this.event.onHello(new Event({ target: this }));
+        this.event.onHello(new Event({ target: new DemoModel({}) }));
+        this.event.onCount(new Event({ value: 100 }));
+        this.event.onPlay(new Event({}));
     }
 
     @StateUtil.on(model => model.proxy.decor)
-    checkState(model: DemoModel, state: DeepReadonly<DemoModel.State>) {
-        return {
-            ...state,
-            price: state.price + 100,
-        }
-    }
-
-    constructor(props: DemoModel['props']) {
-        super({
-            uuid: props?.uuid,
-            state: {
-                name: '',
-                price: 0,
-                emotion: EmotionType.NEUTRAL,
-                gender: GenderType.UNKNOWN,
-                isAlive: true,
-                tags: [],
-                location: { x: 0, y: 0 },
-                ...props?.state,
-            },
-            child: { 
-                foo: new DemoModel({}),
-                bar: new DemoModel({}),
-                baz: [],
-                ...props?.child
-            },
-            refer: {
-                baz: [],
-            },
-        })
+    onCheck(model: DemoModel, state: Decor<DemoProps.S>) {
+        state.current.price += 100;
+        state.current.isAlive = false;
     }
 
 }

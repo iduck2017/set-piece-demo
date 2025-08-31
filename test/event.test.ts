@@ -1,12 +1,12 @@
 import { RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
-import { StaffModel } from "../src/staff";
-import { GenderType } from "../src/common";
+import { StaffModel, StaffProps } from "../src/staff";
+import { GenderType } from "../src/types";
 import { boot } from "./boot";
 
 describe('event', () => {
     boot();
-    const ingsoc = new IngSocModel();
+    const ingsoc = new IngSocModel({});
 
     const obrien = ingsoc.child.minitrue;
     const goldstein = new StaffModel({
@@ -23,7 +23,7 @@ describe('event', () => {
     const winston = obrien.child.subordinates[0];
     const julia = obrien.child.subordinates[1];
 
-    const assets = ingsoc.state.asset;
+    let assets = ingsoc.state.asset;
 
     test('precheck', () => {
         expect(winston).toBeDefined();
@@ -36,67 +36,77 @@ describe('event', () => {
         expect(winston.state.salary).toBe(10);
         expect(winston.state.value).toBe(100);
         expect(winston.state.asset).toBe(100);
-        winston.apply()
+        winston.work()
         expect(winston.state.asset).toBe(100);
         expect(ingsoc.state.asset).toBe(assets);
     })
 
     test('boot', () => {
         RouteUtil.boot(ingsoc);
-        winston.apply();
+        winston.work();
         expect(winston.state.asset).toBe(110);
-        expect(ingsoc.state.asset).toBe(assets + 90);
-
-        julia.apply();
+        assets += 90;
+        expect(ingsoc.state.asset).toBe(assets);
+        julia.work();
         expect(julia.state.asset).toBe(110);
-        expect(ingsoc.state.asset).toBe(assets + 180);
-
-
-        obrien.apply();
+        assets += 90;
+        expect(ingsoc.state.asset).toBe(assets);
+        obrien.work();
         expect(obrien.state.asset).toBe(1100);
-        expect(ingsoc.state.asset).toBe(assets + 80)
-        
+        assets -= 100;
+        expect(ingsoc.state.asset).toBe(assets)
     })
 
     test('promote', () => {
         winston.promote();
         expect(winston.state.salary).toBe(20);
 
-        winston.apply();
+        winston.work();
+        assets += 80
         expect(winston.state.asset).toBe(130);
-        expect(ingsoc.state.asset).toBe(assets + 160);
+        expect(ingsoc.state.asset).toBe(assets);
     })
 
     test('corruption', () => {
         
         ingsoc.corrupt(true);
-        
-        expect(ingsoc.state.asset).toBe(assets - 20000 + 160);
-        obrien.apply();
-        expect(obrien.state.asset).toBe(1300);
-        expect(ingsoc.state.asset).toBe(assets - 20000 - 40);
+        assets -= 40000;
+        expect(ingsoc.state.asset).toBe(assets);
 
-        ingsoc.corrupt(false);
-        expect(ingsoc.child.incidents.length).toBe(0);
-        expect(ingsoc.state.asset).toBe(assets - 40);
+        obrien.work();
+        assets -= 200;
+        expect(obrien.state.asset).toBe(11300);
+        expect(ingsoc.state.asset).toBe(assets);
+
     })
 
 
     test('purge', () => {
         ingsoc.purge(goldstein, obrien);
 
-        expect(goldstein.state.asset).toBe(1000);
-        expect(goldstein.state.salary).toBe(100);
-        goldstein.apply();
-        expect(goldstein.state.asset).toBe(1100);
-        expect(ingsoc.state.asset).toBe(assets - 140);
-        
-        obrien.apply();
+        expect(goldstein.state.asset).toBe(11000);
         expect(obrien.state.asset).toBe(1300);
-        expect(ingsoc.state.asset).toBe(assets - 140);
+        expect(goldstein.state.salary).toBe(200);
+        
+        goldstein.work();
+        assets -= 200;
+        expect(goldstein.state.asset).toBe(11200);
+        expect(ingsoc.state.asset).toBe(assets);
+        
+        obrien.work();
+        expect(obrien.state.asset).toBe(1300);
+        expect(ingsoc.state.asset).toBe(assets);
+    })
 
-        winston.apply();
-        expect(winston.state.asset).toBe(130);
-        expect(ingsoc.state.asset).toBe(assets - 140);
+    test('corruption-off', () => {
+        ingsoc.corrupt(false);
+        assets += 40000;
+        expect(ingsoc.state.asset).toBe(assets);
+        expect(goldstein.state.asset).toBe(1200);
+
+        goldstein.work();
+        assets -= 100;
+        expect(goldstein.state.asset).toBe(1300);
+        expect(ingsoc.state.asset).toBe(assets);
     })
 })
