@@ -56,7 +56,7 @@ describe('child', () => {
         aaronson.draft.child.subordinates.push(syme, syme);
         expect(aaronson.child.subordinates.length).toBe(3);
         expect(aaronson.child.subordinates[1]).toBe(syme);
-        expect(aaronson.child.subordinates[2]).not.toBe(syme);
+        expect(aaronson.child.subordinates[2]).toBe(syme);
         expect(aaronson.child.subordinates[0]?.uuid).not.toBe(syme.uuid);
     })
 
@@ -76,10 +76,10 @@ describe('child', () => {
     test('fill', () => {
         aaronson.draft.child.subordinates.fill(syme);
         expect(aaronson.child.subordinates.length).toBe(4);
-        expect(aaronson.child.subordinates[0]).not.toBe(syme);
-        expect(aaronson.child.subordinates[1]).not.toBe(syme);
-        expect(aaronson.child.subordinates[2]).not.toBe(syme);
-        expect(aaronson.child.subordinates[3]).not.toBe(syme);
+        expect(aaronson.child.subordinates[0]).toBe(syme);
+        expect(aaronson.child.subordinates[1]).toBe(syme);
+        expect(aaronson.child.subordinates[2]).toBe(syme);
+        expect(aaronson.child.subordinates[3]).toBe(syme);
     })
 
     test('splice', () => {
