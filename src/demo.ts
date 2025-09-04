@@ -1,4 +1,4 @@
-import { Decor, Event, Model, StateUtil } from "set-piece";
+import { Decor, Event, Loader, Model, StateUtil } from "set-piece";
 import { EmotionType, GenderType } from "./types";
 import { DeepReadonly } from "utility-types";
 
@@ -36,31 +36,34 @@ export class DemoModel extends Model<
     DemoProps.R
 > {
 
-    constructor(props: DemoModel['props']) {
-        super({
-            uuid: props.uuid,
-            state: {
-                name: props.state?.name ?? '',
-                price: props.state?.price ?? 0,
-                emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
-                gender: props.state?.gender ?? GenderType.UNKNOWN,
-                isAlive: props.state?.isAlive ?? true,
-                tags: props.state?.tags ?? [],
-                location: props.state?.location ?? { x: 0, y: 0 },
-                ...props.state,
-            },
-            child: { 
-                foo: props.child?.foo ?? new DemoModel({}),
-                bar: props.child?.bar ?? new DemoModel({}),
-                baz: props.child?.baz ?? [],
-                ...props.child,
-            },
-            refer: {
-                baz: props.refer?.baz ?? [],
-                bar: props.refer?.bar,
-                ...props.refer,
-            },
-        })
+    constructor(loader?: Loader<DemoModel>) {
+        super(() => {
+            const props = loader?.() ?? {};
+            return {
+                uuid: props.uuid,
+                state: {
+                    name: props.state?.name ?? '',
+                    price: props.state?.price ?? 0,
+                    emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
+                    gender: props.state?.gender ?? GenderType.UNKNOWN,
+                    isAlive: props.state?.isAlive ?? true,
+                    tags: props.state?.tags ?? [],
+                    location: props.state?.location ?? { x: 0, y: 0 },
+                    ...props.state,
+                },
+                child: { 
+                    foo: props.child?.foo ?? new DemoModel(),
+                    bar: props.child?.bar ?? new DemoModel(),
+                    baz: props.child?.baz ?? [],
+                    ...props.child,
+                },
+                refer: {
+                    baz: props.refer?.baz ?? [],
+                    bar: props.refer?.bar,
+                    ...props.refer,
+                },
+            }
+        }) 
     }
 
     test() {
@@ -90,10 +93,10 @@ export class DemoModel extends Model<
         const bar: DemoModel | undefined = this.draft.child.bar;
         const baz: DemoModel[] = this.draft.child.baz;
 
-        this.draft.child.foo = new DemoModel({});
-        this.draft.child.bar = new DemoModel({});
-        this.draft.child.baz = [new DemoModel({})];
-        this.draft.child.baz.push(new DemoModel({}));
+        this.draft.child.foo = new DemoModel();
+        this.draft.child.bar = new DemoModel();
+        this.draft.child.baz = [new DemoModel()];
+        this.draft.child.baz.push(new DemoModel());
         
 
         const foo_2: DemoModel | undefined = this.draft.refer.foo;
@@ -101,13 +104,13 @@ export class DemoModel extends Model<
         const bar_2: DemoModel | undefined = this.draft.refer.bar;
         const baz_2: DemoModel[] | undefined = this.draft.refer.baz;
 
-        this.draft.refer.foo = new DemoModel({});
-        this.draft.refer.bar = new DemoModel({});
-        this.draft.refer.baz = [new DemoModel({})];
-        this.draft.refer.baz.push(new DemoModel({}));
+        this.draft.refer.foo = new DemoModel();
+        this.draft.refer.bar = new DemoModel();
+        this.draft.refer.baz = [new DemoModel()];
+        this.draft.refer.baz.push(new DemoModel());
 
         this.event.onHello(new Event({ target: this }));
-        this.event.onHello(new Event({ target: new DemoModel({}) }));
+        this.event.onHello(new Event({ target: new DemoModel() }));
         this.event.onCount(new Event({ value: 100 }));
         this.event.onPlay(new Event({}));
     }

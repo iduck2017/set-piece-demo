@@ -1,14 +1,14 @@
 import { GenderType } from "../src/types";
 import { IngSocModel } from "../src/ing-soc";
-import { StaffModel, StaffProps } from "../src/staff";
+import { StaffModel } from "../src/staff";
 import { RouteUtil } from "set-piece";
 import { boot } from "./boot";
 
 describe('decor', () => {
     boot();
-    const ingsoc = new IngSocModel({});
+    const ingsoc = new IngSocModel();
     const obrien = ingsoc.child.minitrue;
-    const goldstein = new StaffModel({
+    const goldstein = new StaffModel(() => ({
         state: {
             name: 'Emmanuel Goldstein',
             salary: 100,
@@ -16,31 +16,23 @@ describe('decor', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    })
+    }))
 
 
     const winston = ingsoc.child.minitrue.child.subordinates[0];
     const julia = ingsoc.child.minitrue.child.subordinates[1];
-    
-    test('precheck', () => {
-        expect(winston).toBeDefined();
-        expect(julia).toBeDefined();
-    })
 
-    if (!winston) return;
-    if (!julia) return;
-
+    if (!winston) throw new Error();
 
     test('promote', () => {
         expect(winston.draft.state.salary).toBe(10);
         expect(winston.state.salary).toBe(10);
         winston.promote();
         expect(winston.draft.state.salary).toBe(10);
-        expect(winston.state.salary).toBe(10);
+        expect(winston.state.salary).toBe(20);
     })
 
     test('boot', () => {
-        RouteUtil.boot(ingsoc);
         expect(winston.state.salary).toBe(20);
         expect(winston.draft.state.salary).toBe(10);
     })
@@ -97,7 +89,8 @@ describe('decor', () => {
         expect(obrien.state.asset).toBe(1000);
         expect(obrien.draft.state.salary).toBe(100);
 
-        expect(winston.state.salary).toBe(10);
+        /** two promotion, no depress */
+        expect(winston.state.salary).toBe(30);
         expect(winston.draft.state.salary).toBe(10);
     })
 

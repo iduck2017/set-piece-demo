@@ -1,9 +1,7 @@
 import { GenderType } from "./types";
-import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel } from "set-piece";
-import { IngSocModel } from "./ing-soc";
-import { FeatureModel, FeatureProps } from "./feature";
+import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel, Loader } from "set-piece";
+import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
-import { DeepReadonly } from "utility-types";
 
 export namespace StaffProps {
     export type E = { 
@@ -38,25 +36,28 @@ export class StaffModel extends Model<
 > {
     declare public draft;
 
-    constructor(props: StaffModel['props']) {
-        super({
-            uuid: props?.uuid,
-            state: { 
-                name: props.state?.name ?? 'John Doe', 
-                gender: props.state?.gender ?? GenderType.MALE, 
-                salary: props.state?.salary ?? 10, 
-                asset: props.state?.asset ?? 0, 
-                value: props.state?.value ?? 0,
-                location: props.state?.location ?? { x: 0, y: 0 },
-                tags: props.state?.tags ?? [],
-            },
-            child: { 
-                features: props.child?.features ?? [],
-                subordinates: props.child?.subordinates ?? [],
-            },
-            refer: {
-                friends: props.refer?.friends ?? [],
-            },
+    constructor(loader?: Loader<StaffModel>) {
+        super(() => {
+            const props = loader?.() ?? {};
+            return {
+                uuid: props.uuid,
+                state: { 
+                    name: props.state?.name ?? 'John Doe', 
+                    gender: props.state?.gender ?? GenderType.MALE, 
+                    salary: props.state?.salary ?? 10, 
+                    asset: props.state?.asset ?? 0, 
+                    value: props.state?.value ?? 0,
+                    location: props.state?.location ?? { x: 0, y: 0 },
+                    tags: props.state?.tags ?? [],
+                },
+                child: { 
+                    features: props.child?.features ?? [],
+                    subordinates: props.child?.subordinates ?? [],
+                },
+                refer: {
+                    friends: props.refer?.friends ?? [],
+                },
+            }
         })
     }
 
@@ -81,7 +82,7 @@ export class StaffModel extends Model<
 
     @DebugUtil.log()
     public promote() {
-        const promotion = new PromotionModel({});
+        const promotion = new PromotionModel();
         this.draft.child.features.push(promotion);
     }
 

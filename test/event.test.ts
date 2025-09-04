@@ -6,10 +6,10 @@ import { boot } from "./boot";
 
 describe('event', () => {
     boot();
-    const ingsoc = new IngSocModel({});
+    const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;
-    const goldstein = new StaffModel({
+    const goldstein = new StaffModel(() => ({
         state: {
             name: 'Emmanuel Goldstein',
             salary: 100,
@@ -17,7 +17,7 @@ describe('event', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    })
+    }))
 
 
     const winston = obrien.child.subordinates[0];
@@ -25,24 +25,16 @@ describe('event', () => {
 
     let assets = ingsoc.state.asset;
 
-    test('precheck', () => {
-        expect(winston).toBeDefined();
-        expect(julia).toBeDefined();
-    })
-
-    if (!winston || !julia) return;
+    if (!winston || !julia) throw new Error();
     
     test('apply', () => {
         expect(winston.state.salary).toBe(10);
         expect(winston.state.value).toBe(100);
         expect(winston.state.asset).toBe(100);
-        winston.work()
-        expect(winston.state.asset).toBe(100);
         expect(ingsoc.state.asset).toBe(assets);
     })
 
     test('boot', () => {
-        RouteUtil.boot(ingsoc);
         winston.work();
         expect(winston.state.asset).toBe(110);
         assets += 90;

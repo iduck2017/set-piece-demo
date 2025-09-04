@@ -5,14 +5,14 @@ import { boot } from "./boot";
 
 describe('child', () => {
     boot();
-    const ingsoc = new IngSocModel({});
+    const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;
     const aaronson = ingsoc.child.minipax
 
     const winston = obrien.child.subordinates[0];
     const julia = obrien.child.subordinates[1];
-    const syme = new StaffModel({
+    const syme = new StaffModel(() => ({
         state: {
             name: 'Syme',
             salary: 10,
@@ -20,14 +20,10 @@ describe('child', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    })
+    }))
 
-    test('precheck', () => {
-        expect(winston).toBeDefined();
-        expect(julia).toBeDefined();
-    })
 
-    if (!winston || !julia) return;
+    if (!winston || !julia) throw new Error();
 
     
     test('push', () => {

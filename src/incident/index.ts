@@ -1,5 +1,5 @@
 import { IngSocModel } from "../ing-soc";
-import { Model, Props } from "set-piece";
+import { Method, Model, Props } from "set-piece";
 
 
 export abstract class IncidentModel<
@@ -16,16 +16,19 @@ export abstract class IncidentModel<
         }
     }
 
-    constructor(props: IncidentModel['props'] & {
+    constructor(loader: Method<IncidentModel['props'] & {
         state: S,
         child: C,
         refer: R,
-    }) {
-        super({
-            uuid: props.uuid,
-            state: { ...props.state },
-            child: { ...props.child },
-            refer: { ...props.refer },
+    }, []>) {
+        super(() => {
+            const props = loader();
+            return {
+                uuid: props.uuid,
+                state: { ...props.state },
+                child: { ...props.child },
+                refer: { ...props.refer },
+            }
         })
     }
 }

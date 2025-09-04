@@ -3,17 +3,10 @@ import { boot } from "./boot";
 
 describe('state', () => {
     boot();
-    const ingsoc = new IngSocModel({});
+    const ingsoc = new IngSocModel();
     const winston = ingsoc.child.minitrue.child.subordinates[0];
     const julia = ingsoc.child.minitrue.child.subordinates[1];
-    
-    test('precheck', () => {
-        expect(winston).toBeDefined();
-        expect(julia).toBeDefined();
-    })
-
-    if (!winston) return;
-    if (!julia) return;
+    if (!winston || !julia) throw new Error();
 
     test('income', () => {
         winston.income(100);

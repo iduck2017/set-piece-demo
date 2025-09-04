@@ -1,8 +1,8 @@
-import { DebugUtil, Event, EventUtil, Model, StoreUtil, TranxUtil } from "set-piece";
-import { StaffModel, StaffProps } from "./staff";   
+import { DebugUtil, Event, EventUtil, Loader, Model, RouteUtil, StoreUtil, TranxUtil } from "set-piece";
+import { StaffModel } from "./staff";   
 import { GenderType } from "./types";
-import { DepressionModel, DepressionProps } from "./incident/depression";
-import { CorruptionModel, CorruptionProps } from "./incident/corruption";
+import { DepressionModel } from "./incident/depression";
+import { CorruptionModel } from "./incident/corruption";
 import { IncidentModel } from "./incident";
 
 export namespace IngSocProps {
@@ -22,6 +22,7 @@ export namespace IngSocProps {
 }
 
 
+@RouteUtil.root()
 @StoreUtil.is('ing-soc')
 export class IngSocModel extends Model<
     IngSocProps.E,
@@ -29,79 +30,82 @@ export class IngSocModel extends Model<
     IngSocProps.C,
     IngSocProps.R
 > {
-    constructor(props: IngSocModel['props']) {
-        const winston = new StaffModel({
-            state: {
-                name: 'Winston Smith',
-                salary: 10,
-                asset: 100,
-                value: 100,
-                gender: GenderType.MALE,
-            },
-        });
-        super({
-            uuid: props.uuid,
-            state: { 
-                name: props.state?.name ?? 'Ing Soc', 
-                asset: props.state?.asset ?? 100_000, 
-            },
-            child: { 
-                incidents: props.child?.incidents ?? [],
-                minitrue: props.child?.minitrue ??new StaffModel({ 
-                    state: { 
-                        name: 'O\'Brien',
-                        salary: 100,
-                        asset: 1000,
-                        value: 0,
-                        gender: GenderType.MALE,
-                    },
-                    child: {
-                        subordinates: [
-                            winston,
-                            new StaffModel({
-                                state: {
-                                    name: 'Julia',
-                                    salary: 10,
-                                    asset: 100,
-                                    value: 100,
-                                    gender: GenderType.FEMALE,
-                                }
-                            })
-                        ] 
-                    },
-                    refer: {
-                        friends: [winston]
-                    }
-                }),
-                minipax: props.child?.minipax ?? new StaffModel({ 
-                    state: { 
-                        name: 'Aaronson',
-                        salary: 100,
-                        asset: 1000,
-                        value: 0,
-                        gender: GenderType.MALE,
-                    }
-                }),
-                miniplenty: props.child?.miniplenty ?? new StaffModel({
-                    state: {
-                        name: 'Rutherford',
-                        salary: 100,
-                        asset: 1000,
-                        value: 0,
-                        gender: GenderType.MALE
-                    }
-                }),
-                miniluv: props.child?.miniluv ?? new StaffModel({
-                    state: {
-                        name: 'Jones',
-                        salary: 100,
-                        asset: 1000,
-                        value: 0,
-                        gender: GenderType.MALE,
-                    }
-                }),
-            },
-            refer: {},
+    constructor(loader?: Loader<IngSocModel>) {
+        super(() => {
+            const props = loader?.() ?? {};
+            const winston = new StaffModel(() => ({
+                state: {
+                    name: 'Winston Smith',
+                    salary: 10,
+                    asset: 100,
+                    value: 100,
+                    gender: GenderType.MALE,
+                },
+            }));
+            return {
+                uuid: props.uuid,
+                state: { 
+                    name: props.state?.name ?? 'Ing Soc', 
+                    asset: props.state?.asset ?? 100_000, 
+                },
+                child: { 
+                    incidents: props.child?.incidents ?? [],
+                    minitrue: props.child?.minitrue ?? new StaffModel(() => ({ 
+                        state: { 
+                            name: 'O\'Brien',
+                            salary: 100,
+                            asset: 1000,
+                            value: 0,
+                            gender: GenderType.MALE,
+                        },
+                        child: {
+                            subordinates: [
+                                winston,
+                                new StaffModel(() => ({
+                                    state: {
+                                        name: 'Julia',
+                                        salary: 10,
+                                        asset: 100,
+                                        value: 100,
+                                        gender: GenderType.FEMALE,
+                                    },
+                                    refer: {
+                                        friends: [winston]
+                                    }
+                                }))
+                            ] 
+                        },
+                    })),
+                    minipax: props.child?.minipax ?? new StaffModel(() => ({ 
+                        state: { 
+                            name: 'Aaronson',
+                            salary: 100,
+                            asset: 1000,
+                            value: 0,
+                            gender: GenderType.MALE,
+                        }
+                    })),
+                    miniplenty: props.child?.miniplenty ?? new StaffModel(() => ({
+                        state: {
+                            name: 'Rutherford',
+                            salary: 100,
+                            asset: 1000,
+                            value: 0,
+                            gender: GenderType.MALE
+                        }
+                    })),
+                    miniluv: props.child?.miniluv ?? new StaffModel(() => ({
+                        state: {
+                            name: 'Jones',
+                            salary: 100,
+                            asset: 1000,
+                            value: 0,
+                            gender: GenderType.MALE,
+                        }
+                    })),
+                },
+                refer: {},
+            }
         })
     }
 
@@ -141,7 +145,7 @@ export class IngSocModel extends Model<
         let index = this.draft.child.incidents.findIndex(item => item instanceof DepressionModel);
         if (flag) {
             if (index !== -1) return;
-            this.draft.child.incidents.push(new DepressionModel({}));
+            this.draft.child.incidents.push(new DepressionModel());
         } else {
             if (index === -1) return;
             this.draft.child.incidents.splice(index, 1);

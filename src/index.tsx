@@ -5,6 +5,7 @@ import { IngSocModel } from "./ing-soc";
 import { StaffModel, StaffProps } from "./staff";
 import { GenderType } from "./types";
 
+DebugUtil.level = LogLevel.INFO;
 export class AppService {
     private static _rootView?: HTMLElement;
     
@@ -17,12 +18,12 @@ export class AppService {
 
     @DebugUtil.log()
     public static boot() {
-        const ingsoc = new IngSocModel({});
+        const ingsoc = new IngSocModel();
         const obrien = ingsoc.child.minitrue;
         const winston = obrien.child.subordinates[0];
         const julia = obrien.child.subordinates[1];
 
-        AppService._rootModel = RouteUtil.boot(ingsoc);
+        AppService._rootModel = ingsoc;
 
         window.root = AppService._rootModel;
         AppService._rootView = document.getElementById("root") ?? undefined;
@@ -37,7 +38,7 @@ export class AppService {
 
         const obrien = ingsoc.child.minitrue;
         const aaronson = ingsoc.child.minipax;
-        const goldstein = new StaffModel({
+        const goldstein = new StaffModel(() => ({
             state: {
                 name: 'Emmanuel Goldstein',
                 salary: 100,
@@ -45,13 +46,13 @@ export class AppService {
                 value: 0,
                 gender: GenderType.MALE,
             }
-        });
-
+        }));
         const winston = obrien.child.subordinates[0];
         const julia = obrien.child.subordinates[1];
-
         if (!winston) return;
         if (!julia) return;
+
+        console.log(julia.refer.friends)
 
         console.log(aaronson.state.salary);
         console.log(aaronson.state.asset);
@@ -70,7 +71,6 @@ export class AppService {
         ingsoc.depress(false);
         console.log(aaronson.state.salary);
         console.log(winston.state.salary)
-
 
         console.log('corrupt')
         ingsoc.corrupt(true);

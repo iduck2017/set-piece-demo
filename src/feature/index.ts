@@ -1,5 +1,5 @@
 import { StaffModel, StaffProps } from "../staff";
-import { Model, Props } from "set-piece";
+import { Method, Model, Props } from "set-piece";
 
 export namespace FeatureProps {
     export type E = {};
@@ -22,20 +22,23 @@ export abstract class FeatureModel<
         }
     }
 
-    constructor(props: FeatureModel['props'] & {
+    constructor(loader: Method<FeatureModel['props'] & {
         uuid: string | undefined,
         state: S,
         child: C,
         refer: R,
-    }) {
-        super({
-            uuid: props.uuid,
-            state: { 
-                isActive: true,
-                ...props.state 
-            },
-            child: { ...props.child },
-            refer: { ...props.refer },
+    }, []>) {
+        super(() => {
+            const props = loader();
+            return {
+                uuid: props.uuid,
+                state: { 
+                    isActive: true,
+                    ...props.state 
+                },
+                child: { ...props.child },
+                refer: { ...props.refer },
+            }
         })
     }
 }
