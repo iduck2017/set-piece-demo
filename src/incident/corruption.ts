@@ -1,4 +1,4 @@
-import { Decor, Loader, Model, StateUtil, StoreUtil } from "set-piece";
+import { DebugUtil, Decor, Loader, LogLevel, Model, StateUtil, StoreUtil } from "set-piece";
 import { IncidentModel } from ".";
 import { IngSocModel, IngSocProps } from "../ing-soc";
 import { StaffModel, StaffProps } from "../staff";
@@ -8,6 +8,7 @@ export namespace CorruptionProps {
     export type E = {};
     export type S = {};
     export type C = {};
+    export type P = {};
     export type R = {};
 }
 
@@ -16,6 +17,7 @@ export class CorruptionModel extends IncidentModel<
     CorruptionProps.E,
     CorruptionProps.S,
     CorruptionProps.C,
+    CorruptionProps.P,
     CorruptionProps.R
 > {
     constructor(loader?: Loader<CorruptionModel>) {
@@ -26,6 +28,7 @@ export class CorruptionModel extends IncidentModel<
                 state: {},
                 child: {},
                 refer: {},
+                route: {}
             }
         })
     }
@@ -35,6 +38,7 @@ export class CorruptionModel extends IncidentModel<
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniluv.decor)
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
     private onSalaryCheck(model: StaffModel, state: Decor<StaffProps.S>) {
+        console.log(model.name)
         state.current.salary += 100;
         state.current.asset += 10000;
     }

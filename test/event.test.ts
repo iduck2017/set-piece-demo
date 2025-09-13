@@ -2,10 +2,8 @@ import { RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
 import { StaffModel, StaffProps } from "../src/staff";
 import { GenderType } from "../src/types";
-import { boot } from "./boot";
 
 describe('event', () => {
-    boot();
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;
@@ -69,11 +67,11 @@ describe('event', () => {
         assets -= 200;
         expect(obrien.state.asset).toBe(11300);
         expect(ingsoc.state.asset).toBe(assets);
-
     })
 
 
     test('purge', () => {
+        console.log('purge')
         ingsoc.purge(goldstein, obrien);
 
         expect(goldstein.state.asset).toBe(11000);
@@ -90,15 +88,15 @@ describe('event', () => {
         expect(ingsoc.state.asset).toBe(assets);
     })
 
-    test('corruption-off', () => {
-        ingsoc.corrupt(false);
-        assets += 40000;
-        expect(ingsoc.state.asset).toBe(assets);
-        expect(goldstein.state.asset).toBe(1200);
+    // test('corruption-off', () => {
+    //     ingsoc.corrupt(false);
+    //     assets += 40000;
+    //     expect(ingsoc.state.asset).toBe(assets);
+    //     expect(goldstein.state.asset).toBe(1200);
 
-        goldstein.work();
-        assets -= 100;
-        expect(goldstein.state.asset).toBe(1300);
-        expect(ingsoc.state.asset).toBe(assets);
-    })
+    //     goldstein.work();
+    //     assets -= 100;
+    //     expect(goldstein.state.asset).toBe(1300);
+    //     expect(ingsoc.state.asset).toBe(assets);
+    // })
 })

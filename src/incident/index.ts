@@ -1,25 +1,34 @@
 import { IngSocModel } from "../ing-soc";
 import { Method, Model, Props } from "set-piece";
 
+export namespace IncidentProps {
+    export type E = {};
+    export type S = {};
+    export type C = {};
+    export type P = {
+        ingsoc: IngSocModel;
+    };
+    export type R = {};
+}
 
 export abstract class IncidentModel<
-    E extends Props.E = {},
-    S extends Props.S = {},
-    C extends Props.C = {},
-    R extends Props.R = {}
-> extends Model<E, S, C, R> {
-    public get route() {
-        const ingsoc = super.route.parent;
-        return {
-            ...super.route,
-            ingsoc: ingsoc instanceof IngSocModel ? ingsoc : undefined,
-        }
-    }
-
+    E extends Partial<IncidentProps.E> & Props.E = {},
+    S extends Partial<IncidentProps.S> & Props.S = {},
+    C extends Partial<IncidentProps.C> & Props.C = {},
+    P extends Partial<IncidentProps.P> & Props.P = {},
+    R extends Partial<IncidentProps.R> & Props.R = {}
+> extends Model<
+    E,
+    S & IncidentProps.S,
+    C,
+    P & IncidentProps.P,
+    R
+> {
     constructor(loader: Method<IncidentModel['props'] & {
         state: S,
         child: C,
         refer: R,
+        route: P,
     }, []>) {
         super(() => {
             const props = loader();
@@ -28,6 +37,10 @@ export abstract class IncidentModel<
                 state: { ...props.state },
                 child: { ...props.child },
                 refer: { ...props.refer },
+                route: {
+                    ingsoc: IngSocModel.prototype,
+                    ...props.route,
+                }
             }
         })
     }

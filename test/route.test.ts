@@ -1,11 +1,8 @@
 import { GenderType } from "../src/types";
 import { IngSocModel } from "../src/ing-soc";
 import { StaffModel } from "../src/staff";
-import { boot } from "./boot";
 
 describe('route', () => {
-    
-    boot();
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;

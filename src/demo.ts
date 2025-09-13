@@ -1,6 +1,8 @@
 import { Decor, Event, Loader, Model, StateUtil } from "set-piece";
 import { EmotionType, GenderType } from "./types";
 import { DeepReadonly } from "utility-types";
+import { IngSocModel } from "./ing-soc";
+import { StaffModel } from "./staff";
 
 export namespace DemoProps {
     export type E = { 
@@ -22,6 +24,10 @@ export namespace DemoProps {
         bar?: DemoModel,
         baz: DemoModel[],
     }
+    export type P = {
+        ingSoc: IngSocModel
+        staff: StaffModel
+    };
     export type R = { 
         foo?: DemoModel,
         bar?: DemoModel,
@@ -33,6 +39,7 @@ export class DemoModel extends Model<
     DemoProps.E,
     DemoProps.S,
     DemoProps.C,
+    DemoProps.P,
     DemoProps.R
 > {
 
@@ -62,6 +69,10 @@ export class DemoModel extends Model<
                     bar: props.refer?.bar,
                     ...props.refer,
                 },
+                route: {
+                    ingSoc: IngSocModel.prototype,
+                    staff: StaffModel.prototype,
+                }
             }
         }) 
     }

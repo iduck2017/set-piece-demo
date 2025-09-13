@@ -7,6 +7,7 @@ export namespace DepressionProps {
     export type E = {};
     export type S = { readonly level: number};
     export type C = {};
+    export type P = {};
     export type R = {};
 }
 
@@ -14,6 +15,7 @@ export class DepressionModel extends IncidentModel<
     DepressionProps.E,
     DepressionProps.S,
     DepressionProps.C,
+    DepressionProps.P,
     DepressionProps.R
 > {
     constructor(loader?: Loader<DepressionModel>) {
@@ -24,6 +26,7 @@ export class DepressionModel extends IncidentModel<
                 state: { level: props.state?.level ?? 1 },
                 child: {},
                 refer: {},
+                route: {}
             }
         })
     }

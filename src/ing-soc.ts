@@ -18,6 +18,7 @@ export namespace IngSocProps {
         minitrue: StaffModel;
         incidents: IncidentModel[];
     }
+    export type P = {};
     export type R = {}
 }
 
@@ -28,6 +29,7 @@ export class IngSocModel extends Model<
     IngSocProps.E,
     IngSocProps.S,
     IngSocProps.C,
+    IngSocProps.P,
     IngSocProps.R
 > {
     constructor(loader?: Loader<IngSocModel>) {
@@ -105,6 +107,7 @@ export class IngSocModel extends Model<
                     })),
                 },
                 refer: {},
+                route: {}
             }
         })
     }

@@ -2,6 +2,7 @@ import { GenderType } from "./types";
 import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel, Loader } from "set-piece";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
+import { IngSocModel } from "./ing-soc";
 
 export namespace StaffProps {
     export type E = { 
@@ -21,6 +22,9 @@ export namespace StaffProps {
         subordinates: StaffModel[]
         features: FeatureModel[]
     };
+    export type P = {
+        ingSoc: IngSocModel
+    };
     export type R = { 
         spouse?: StaffModel 
         friends: StaffModel[]
@@ -32,6 +36,7 @@ export class StaffModel extends Model<
     StaffProps.E,
     StaffProps.S,
     StaffProps.C,
+    StaffProps.P,
     StaffProps.R
 > {
     declare public draft;
@@ -57,6 +62,9 @@ export class StaffModel extends Model<
                 refer: {
                     friends: props.refer?.friends ?? [],
                 },
+                route: {
+                    ingSoc: IngSocModel.prototype,
+                }
             }
         })
     }
