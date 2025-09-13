@@ -29,8 +29,8 @@ export class IngSocModel extends Model<
     IngSocProps.E,
     IngSocProps.S,
     IngSocProps.C,
-    IngSocProps.P,
-    IngSocProps.R
+    IngSocProps.R,
+    IngSocProps.P
 > {
     constructor(loader?: Loader<IngSocModel>) {
         super(() => {

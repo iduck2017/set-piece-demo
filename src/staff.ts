@@ -36,8 +36,8 @@ export class StaffModel extends Model<
     StaffProps.E,
     StaffProps.S,
     StaffProps.C,
-    StaffProps.P,
-    StaffProps.R
+    StaffProps.R,
+    StaffProps.P
 > {
     declare public draft;
 

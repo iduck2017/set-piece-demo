@@ -39,8 +39,8 @@ export class DemoModel extends Model<
     DemoProps.E,
     DemoProps.S,
     DemoProps.C,
-    DemoProps.P,
-    DemoProps.R
+    DemoProps.R,
+    DemoProps.P
 > {
 
     constructor(loader?: Loader<DemoModel>) {

@@ -15,14 +15,14 @@ export abstract class IncidentModel<
     E extends Partial<IncidentProps.E> & Props.E = {},
     S extends Partial<IncidentProps.S> & Props.S = {},
     C extends Partial<IncidentProps.C> & Props.C = {},
-    P extends Partial<IncidentProps.P> & Props.P = {},
-    R extends Partial<IncidentProps.R> & Props.R = {}
+    R extends Partial<IncidentProps.R> & Props.R = {},
+    P extends Partial<IncidentProps.P> & Props.P = {}
 > extends Model<
     E,
     S & IncidentProps.S,
     C,
-    P & IncidentProps.P,
-    R
+    R,
+    P & IncidentProps.P
 > {
     constructor(loader: Method<IncidentModel['props'] & {
         state: S,

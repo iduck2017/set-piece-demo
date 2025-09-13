@@ -21,5 +21,4 @@ export class PromotionModel extends FeatureModel {
     private onCheck(model: StaffModel, state: Decor<StaffProps.S>) {
         state.current.salary += 10;
     }
-
 }
