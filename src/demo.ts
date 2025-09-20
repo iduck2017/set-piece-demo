@@ -128,8 +128,8 @@ export class DemoModel extends Model<
 
     @StateUtil.on(model => model.proxy.decor)
     onCheck(model: DemoModel, state: Decor<DemoProps.S>) {
-        state.current.price += 100;
-        state.current.isAlive = false;
+        state.draft.price += 100;
+        state.draft.isAlive = false;
     }
 
 }

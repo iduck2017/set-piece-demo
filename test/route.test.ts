@@ -24,6 +24,7 @@ describe('route', () => {
 
     test('parent', () => {
         expect(ingsoc.route.parent).toBe(undefined);
+        console.log(obrien.route)
         expect(obrien.route.parent).toBe(ingsoc);
         expect(winston.route.parent).toBe(obrien);
         expect(julia.route.parent).toBe(obrien);

@@ -39,12 +39,12 @@ export class CorruptionModel extends IncidentModel<
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
     private onSalaryCheck(model: StaffModel, state: Decor<StaffProps.S>) {
         console.log(model.name)
-        state.current.salary += 100;
-        state.current.asset += 10000;
+        state.draft.salary += 100;
+        state.draft.asset += 10000;
     }
 
     @StateUtil.on((model) => model.route.ingsoc?.proxy.decor)
     private onAssetCheck(model: IngSocModel, state: Decor<IngSocProps.S>) {
-        state.current.asset -= 40000;
+        state.draft.asset -= 40000;
     }
 }

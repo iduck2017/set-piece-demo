@@ -37,45 +37,46 @@ export class AppService {
         if (!ingsoc) return;
 
         const obrien = ingsoc.child.minitrue;
-        const aaronson = ingsoc.child.minipax;
-        const goldstein = new StaffModel(() => ({
-            state: {
-                name: 'Emmanuel Goldstein',
-                salary: 100,
-                asset: 10_000,
-                value: 0,
-                gender: GenderType.MALE,
-            }
-        }));
-        const winston = obrien.child.subordinates[0];
-        const julia = obrien.child.subordinates[1];
-        if (!winston) return;
-        if (!julia) return;
+        console.log(obrien.route.parent)
+        // const aaronson = ingsoc.child.minipax;
+        // const goldstein = new StaffModel(() => ({
+        //     state: {
+        //         name: 'Emmanuel Goldstein',
+        //         salary: 100,
+        //         asset: 10_000,
+        //         value: 0,
+        //         gender: GenderType.MALE,
+        //     }
+        // }));
+        // const winston = obrien.child.subordinates[0];
+        // const julia = obrien.child.subordinates[1];
+        // if (!winston) return;
+        // if (!julia) return;
 
-        console.log(julia.refer.friends)
+        // console.log(julia.refer.friends)
 
-        console.log(aaronson.state.salary);
-        console.log(aaronson.state.asset);
-        aaronson.work();
-        console.log(aaronson.state.asset);
-        aaronson.promote();
-        console.log(aaronson.state.salary)
-        winston.promote();
-        console.log(winston.state.salary);
-        ingsoc.depress(true);
-        console.log(winston.state.salary);
-        console.log(aaronson.state.salary);
+        // console.log(aaronson.state.salary);
+        // console.log(aaronson.state.asset);
+        // aaronson.work();
+        // console.log(aaronson.state.asset);
+        // aaronson.promote();
+        // console.log(aaronson.state.salary)
+        // winston.promote();
+        // console.log(winston.state.salary);
+        // ingsoc.depress(true);
+        // console.log(winston.state.salary);
+        // console.log(aaronson.state.salary);
 
-        aaronson.demote();
-        console.log(aaronson.state.salary);
-        ingsoc.depress(false);
-        console.log(aaronson.state.salary);
-        console.log(winston.state.salary)
+        // aaronson.demote();
+        // console.log(aaronson.state.salary);
+        // ingsoc.depress(false);
+        // console.log(aaronson.state.salary);
+        // console.log(winston.state.salary)
 
-        console.log('corrupt')
-        ingsoc.corrupt(true);
-        console.log(aaronson.state.salary)
-        console.log(ingsoc.state.asset)
+        // console.log('corrupt')
+        // ingsoc.corrupt(true);
+        // console.log(aaronson.state.salary)
+        // console.log(ingsoc.state.asset)
     }
 }
 

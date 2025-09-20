@@ -19,6 +19,6 @@ export class PromotionModel extends FeatureModel {
 
     @StateUtil.on(model => model.route.staff?.proxy.decor)
     private onCheck(model: StaffModel, state: Decor<StaffProps.S>) {
-        state.current.salary += 10;
+        state.draft.salary += 10;
     }
 }

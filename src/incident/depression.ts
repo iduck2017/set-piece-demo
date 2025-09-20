@@ -33,6 +33,6 @@ export class DepressionModel extends IncidentModel<
     
     @StateUtil.on((model) => model.route.ingsoc?.proxy.all(StaffModel).decor)
     private onSalaryCheck(model: StaffModel, state: Decor<StaffProps.S>) {
-        state.current.salary -= 10;
+        state.draft.salary -= 10;
     }
 }
