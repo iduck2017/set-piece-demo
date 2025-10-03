@@ -1,6 +1,6 @@
 import { DemoModel } from "../demo";
 import { StaffModel, StaffProps } from "../staff";
-import { Format, Method, Model, Props } from "set-piece";
+import { Method, Model, Props } from "set-piece";
 
 export namespace FeatureProps {
     export type E = {};

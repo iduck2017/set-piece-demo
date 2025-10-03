@@ -1,7 +1,7 @@
 import { DebugUtil, Decor, Loader, LogLevel, Model, StateUtil, StoreUtil } from "set-piece";
 import { IncidentModel } from ".";
-import { IngSocModel, IngSocProps } from "../ing-soc";
-import { StaffModel, StaffProps } from "../staff";
+import { IngSocDecor, IngSocModel, IngSocProps } from "../ing-soc";
+import { StaffDecor, StaffModel, StaffProps } from "../staff";
 import { DeepReadonly } from "utility-types";
 
 export namespace CorruptionProps {
@@ -37,14 +37,13 @@ export class CorruptionModel extends IncidentModel<
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minitrue.decor)
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniluv.decor)
     @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
-    private onSalaryCheck(model: StaffModel, state: Decor<StaffProps.S>) {
-        console.log(model.name)
+    private onSalaryCheck(model: StaffModel, state: StaffDecor) {
         state.draft.salary += 100;
         state.draft.asset += 10000;
     }
 
     @StateUtil.on((model) => model.route.ingsoc?.proxy.decor)
-    private onAssetCheck(model: IngSocModel, state: Decor<IngSocProps.S>) {
+    private onAssetCheck(model: IngSocModel, state: IngSocDecor) {
         state.draft.asset -= 40000;
     }
 }

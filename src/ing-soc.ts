@@ -1,4 +1,4 @@
-import { DebugUtil, Event, EventUtil, Loader, Model, RouteUtil, StoreUtil, TranxUtil } from "set-piece";
+import { DebugUtil, Decor, Event, EventUtil, Loader, Model, RouteUtil, StateUtil, StoreUtil, TranxUtil } from "set-piece";
 import { StaffModel } from "./staff";   
 import { GenderType } from "./types";
 import { DepressionModel } from "./incident/depression";
@@ -22,7 +22,15 @@ export namespace IngSocProps {
     export type R = {}
 }
 
+export class IngSocDecor extends Decor<IngSocProps.S> {
+    public draft: Pick<IngSocProps.S, 'asset'>;
+    constructor(model: IngSocModel) {
+        super(model);
+        this.draft = this.detail;
+    }
+}
 
+@StateUtil.use(IngSocDecor)
 @RouteUtil.root()
 @StoreUtil.is('ing-soc')
 export class IngSocModel extends Model<

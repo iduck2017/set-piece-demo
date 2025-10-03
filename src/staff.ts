@@ -1,5 +1,5 @@
 import { GenderType } from "./types";
-import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel, Loader } from "set-piece";
+import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel, Loader, Decor } from "set-piece";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
 import { IngSocModel } from "./ing-soc";
@@ -31,6 +31,17 @@ export namespace StaffProps {
     };
 }
 
+export class StaffDecor extends Decor<
+    StaffProps.S
+> {
+    public draft: Pick<StaffProps.S, 'salary' | 'asset'>;
+    constructor(model: StaffModel) {
+        super(model);
+        this.draft = this.detail;
+    }
+}
+
+@StateUtil.use(StaffDecor)
 @StoreUtil.is('staff')
 export class StaffModel extends Model<
     StaffProps.E,

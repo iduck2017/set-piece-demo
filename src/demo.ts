@@ -35,6 +35,13 @@ export namespace DemoProps {
     }
 }
 
+export class DemoDecor extends Decor<DemoProps.S> {
+    public disable() {
+        this.detail.isAlive = false;
+    }
+}
+
+@StateUtil.use(DemoDecor)
 export class DemoModel extends Model<
     DemoProps.E,
     DemoProps.S,
@@ -127,9 +134,8 @@ export class DemoModel extends Model<
     }
 
     @StateUtil.on(model => model.proxy.decor)
-    onCheck(model: DemoModel, state: Decor<DemoProps.S>) {
-        state.draft.price += 100;
-        state.draft.isAlive = false;
+    onCheck(model: DemoModel, state: DemoDecor) {
+        state.disable()
     }
 
 }

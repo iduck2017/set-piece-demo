@@ -1,6 +1,6 @@
 import { DebugUtil, Decor, Method, Loader, LogLevel, Model, StateUtil } from "set-piece";
 import { FeatureModel, FeatureProps } from ".";
-import { StaffModel, StaffProps } from "../staff";
+import { StaffDecor, StaffModel, StaffProps } from "../staff";
 import { DeepReadonly } from "utility-types";
 
 export class PromotionModel extends FeatureModel {
@@ -18,7 +18,7 @@ export class PromotionModel extends FeatureModel {
     }
 
     @StateUtil.on(model => model.route.staff?.proxy.decor)
-    private onCheck(model: StaffModel, state: Decor<StaffProps.S>) {
+    private onCheck(model: StaffModel, state: StaffDecor) {
         state.draft.salary += 10;
     }
 }

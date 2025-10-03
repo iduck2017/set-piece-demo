@@ -1,5 +1,5 @@
 import { DebugUtil, Decor, Loader, StateUtil } from "set-piece";
-import { StaffModel, StaffProps } from "../staff";
+import { StaffDecor, StaffModel, StaffProps } from "../staff";
 import { IncidentModel } from ".";
 import { DeepReadonly } from "utility-types";
 
@@ -32,7 +32,7 @@ export class DepressionModel extends IncidentModel<
     }
     
     @StateUtil.on((model) => model.route.ingsoc?.proxy.all(StaffModel).decor)
-    private onSalaryCheck(model: StaffModel, state: Decor<StaffProps.S>) {
+    private onSalaryCheck(model: StaffModel, state: StaffDecor) {
         state.draft.salary -= 10;
     }
 }
