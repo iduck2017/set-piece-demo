@@ -1,38 +1,36 @@
-import { DebugUtil, Decor, Loader, StateUtil } from "set-piece";
-import { StaffDecor, StaffModel, StaffProps } from "../staff";
+import { DebugUtil, Decor, StateUtil } from "set-piece";
+import { StaffDecor, StaffModel } from "../staff";
 import { IncidentModel } from ".";
 import { DeepReadonly } from "utility-types";
 
-export namespace DepressionProps {
+export namespace DepressionModel {
     export type E = {};
     export type S = { readonly level: number};
     export type C = {};
-    export type P = {};
     export type R = {};
 }
 
 export class DepressionModel extends IncidentModel<
-    DepressionProps.E,
-    DepressionProps.S,
-    DepressionProps.C,
-    DepressionProps.P,
-    DepressionProps.R
+    DepressionModel.E,
+    DepressionModel.S,
+    DepressionModel.C,
+    DepressionModel.R
 > {
-    constructor(loader?: Loader<DepressionModel>) {
-        super(() => {
-            const props = loader?.() ?? {};
-            return {
-                uuid: props.uuid,
-                state: { level: props.state?.level ?? 1 },
-                child: {},
-                refer: {},
-                route: {}
-            }
+    constructor(props?: DepressionModel['props']) {
+        super({
+            uuid: props?.uuid,
+            state: { level: props?.state?.level ?? 1 },
+            child: {},
+            refer: {},  
         })
     }
+
+    @StateUtil.on(self => self.onCompute)
+    private load() {
+        return this.route.ingsoc?.proxy.any(StaffModel).decor
+    }
     
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.all(StaffModel).decor)
-    private onSalaryCheck(model: StaffModel, state: StaffDecor) {
-        state.draft.salary -= 10;
+    private onCompute(model: StaffModel, state: StaffDecor) {
+        state.current.salary -= 10;
     }
 }

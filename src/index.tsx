@@ -1,11 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { DebugUtil, LogLevel, Model, RouteUtil, StoreUtil } from "set-piece";
+import { DebugUtil } from "set-piece";
 import { IngSocModel } from "./ing-soc";
-import { StaffModel, StaffProps } from "./staff";
+import { StaffModel } from "./staff";
 import { GenderType } from "./types";
 
-DebugUtil.level = LogLevel.INFO;
 export class AppService {
     private static _rootView?: HTMLElement;
     

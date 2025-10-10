@@ -1,13 +1,13 @@
 import { GenderType } from "./types";
-import { Model, Event, StoreUtil, DebugUtil, EventUtil, StateUtil, TranxUtil, LogLevel, Loader, Decor } from "set-piece";
 import { FeatureModel } from "./feature";
 import { PromotionModel } from "./feature/promotion";
 import { IngSocModel } from "./ing-soc";
+import { DebugUtil, Decor, Model, TemplUtil, TranxUtil } from "set-piece";
 
-export namespace StaffProps {
+export namespace StaffModel {
     export type E = { 
-        onWork: Event, 
-        onEarn: Event 
+        onWork: {}, 
+        onEarn: {} 
     };
     export type S = { 
         salary: number; 
@@ -22,9 +22,6 @@ export namespace StaffProps {
         subordinates: StaffModel[]
         features: FeatureModel[]
     };
-    export type P = {
-        ingSoc: IngSocModel
-    };
     export type R = { 
         spouse?: StaffModel 
         friends: StaffModel[]
@@ -32,51 +29,45 @@ export namespace StaffProps {
 }
 
 export class StaffDecor extends Decor<
-    StaffProps.S
+    StaffModel.S
 > {
-    public draft: Pick<StaffProps.S, 'salary' | 'asset'>;
+    public current: Pick<StaffModel.S, 'salary' | 'asset'>;
     constructor(model: StaffModel) {
         super(model);
-        this.draft = this.detail;
+        this.current = this.origin;
     }
 }
 
-@StateUtil.use(StaffDecor)
-@StoreUtil.is('staff')
+@TemplUtil.is('staff')
 export class StaffModel extends Model<
-    StaffProps.E,
-    StaffProps.S,
-    StaffProps.C,
-    StaffProps.R,
-    StaffProps.P
+    StaffModel.E,
+    StaffModel.S,
+    StaffModel.C,
+    StaffModel.R
 > {
-    declare public draft;
+    declare public origin;
 
-    constructor(loader?: Loader<StaffModel>) {
-        super(() => {
-            const props = loader?.() ?? {};
-            return {
-                uuid: props.uuid,
-                state: { 
-                    name: props.state?.name ?? 'John Doe', 
-                    gender: props.state?.gender ?? GenderType.MALE, 
-                    salary: props.state?.salary ?? 10, 
-                    asset: props.state?.asset ?? 0, 
-                    value: props.state?.value ?? 0,
-                    location: props.state?.location ?? { x: 0, y: 0 },
-                    tags: props.state?.tags ?? [],
-                },
-                child: { 
-                    features: props.child?.features ?? [],
-                    subordinates: props.child?.subordinates ?? [],
-                },
-                refer: {
-                    friends: props.refer?.friends ?? [],
-                },
-                route: {
-                    ingSoc: IngSocModel.prototype,
-                }
-            }
+    public get decor(): StaffDecor { return new StaffDecor(this) }
+
+    constructor(props?: StaffModel['props']) {
+        super({
+            uuid: props?.uuid,
+            state: { 
+                name: props?.state?.name ?? 'John Doe', 
+                gender: props?.state?.gender ?? GenderType.MALE, 
+                salary: props?.state?.salary ?? 10, 
+                asset: props?.state?.asset ?? 0, 
+                value: props?.state?.value ?? 0,
+                location: props?.state?.location ?? { x: 0, y: 0 },
+                tags: props?.state?.tags ?? [],
+            },
+            child: { 
+                features: props?.child?.features ?? [],
+                subordinates: props?.child?.subordinates ?? [],
+            },
+            refer: {
+                friends: props?.refer?.friends ?? [],
+            },
         })
     }
 
@@ -86,30 +77,30 @@ export class StaffModel extends Model<
 
     @DebugUtil.log()
     public work() {
-        this.event.onWork(new Event({}));
+        this.event.onWork({});
     }
 
     @DebugUtil.log()
     public income(value: number): number {
-        if (this.draft.state.asset + value < 0) {
-            value = -this.draft.state.asset;
+        if (this.origin.state.asset + value < 0) {
+            value = -this.origin.state.asset;
         }
-        this.draft.state.asset += value;
+        this.origin.state.asset += value;
         return value;
     }
 
 
     @DebugUtil.log()
     public promote() {
-        const promotion = new PromotionModel();
-        this.draft.child.features.push(promotion);
+        const promotion = new PromotionModel({});
+        this.origin.child.features.push(promotion);
     }
 
     
     @DebugUtil.log()
     public demote() {
-        const features = this.draft.child.features;
-        const index = features.findIndex((feature) => feature instanceof PromotionModel);
+        const features = this.origin.child.features;
+        const index = features.findIndex((item) => item instanceof PromotionModel);
         if (index === -1) return;
         features.splice(index, 1);
     }
@@ -117,15 +108,15 @@ export class StaffModel extends Model<
     @DebugUtil.log()
     @TranxUtil.span()
     public hello(staff: StaffModel) {
-        this.draft.refer.friends?.push(staff);
-        return [...this.draft.refer.friends ?? []]
+        this.origin.refer.friends?.push(staff);
+        return [...this.origin.refer.friends ?? []]
     }
 
     @DebugUtil.log()
     public remove(staff: StaffModel) {
         const index = this.child.subordinates.indexOf(staff);
         if (index === -1) return undefined;
-        this.draft.child.subordinates.splice(index, 1);
+        this.origin.child.subordinates.splice(index, 1);
         return staff;
     }
 

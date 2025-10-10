@@ -1,24 +1,27 @@
-import { DebugUtil, Decor, Method, Loader, LogLevel, Model, StateUtil } from "set-piece";
-import { FeatureModel, FeatureProps } from ".";
-import { StaffDecor, StaffModel, StaffProps } from "../staff";
+import { DebugUtil, Decor, Method, Model, StateUtil, TemplUtil } from "set-piece";
+import { StaffDecor, StaffModel } from "../staff";
 import { DeepReadonly } from "utility-types";
+import { FeatureModel } from ".";
 
+@TemplUtil.is('promotion')
 export class PromotionModel extends FeatureModel {
-    constructor(loader?: Loader<PromotionModel>) {
-        super(() => {
-            const props = loader?.() ?? {};
-            return {
-                uuid: props.uuid,
-                state: {},
-                child: {},
-                refer: {},
-                route: {}
-            }
+    constructor(props?: PromotionModel['props']) {
+        super({
+            uuid: props?.uuid,
+            state: {},
+            child: {},
+            refer: {},
         })
     }
 
-    @StateUtil.on(model => model.route.staff?.proxy.decor)
-    private onCheck(model: StaffModel, state: StaffDecor) {
-        state.draft.salary += 10;
+    @StateUtil.on(self => self.onCompute)
+    private load() {
+        return this.route.staff?.proxy.decor
+    }
+
+    private onCompute(model: StaffModel, decor: StaffDecor) {
+        console.log('promotion onCompute', decor.current.salary)
+        decor.current.salary += 10;
+        console.log(decor.current.salary);
     }
 }

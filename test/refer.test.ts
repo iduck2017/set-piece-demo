@@ -1,6 +1,6 @@
 import { GenderType } from "../src/types";
 import { IngSocModel } from "../src/ing-soc";
-import { StaffModel, StaffProps } from "../src/staff";
+import { StaffModel } from "../src/staff";
 import { RouteUtil } from "set-piece";
 
 describe('refer', () => {
@@ -11,7 +11,7 @@ describe('refer', () => {
 
     const winston = obrien.child.subordinates[0];
     const julia = obrien.child.subordinates[1];
-    const syme = new StaffModel(() => ({
+    const syme = new StaffModel({
         state: {
             name: 'Syme',
             salary: 10,
@@ -19,10 +19,11 @@ describe('refer', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    }))
+    })
     if (!winston || !julia) throw new Error();
 
     test('refer', () => {
+        console.log('refer', julia.refer.friends)
         expect(julia.refer.friends).toContain(winston)
         expect(winston.refer.friends?.length).toBe(0);
         winston.hello(julia);
@@ -41,7 +42,7 @@ describe('refer', () => {
 
 
     test('bind', () => {
-        aaronson.draft.child.subordinates.push(syme);
+        aaronson.origin.child.subordinates.push(syme);
         expect(aaronson.child.subordinates.length).toBe(1);
         winston.hello(syme);
         expect(winston.refer.friends?.length).toBe(2);

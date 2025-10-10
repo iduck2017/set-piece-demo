@@ -1,7 +1,7 @@
-import { DebugUtil, Decor, Loader, LogLevel, Model, StateUtil, StoreUtil } from "set-piece";
+import { TemplUtil, StateUtil } from "set-piece";
 import { IncidentModel } from ".";
-import { IngSocDecor, IngSocModel, IngSocProps } from "../ing-soc";
-import { StaffDecor, StaffModel, StaffProps } from "../staff";
+import { IngSocDecor, IngSocModel } from "../ing-soc";
+import { StaffDecor, StaffModel } from "../staff";
 import { DeepReadonly } from "utility-types";
 
 export namespace CorruptionProps {
@@ -12,38 +12,48 @@ export namespace CorruptionProps {
     export type R = {};
 }
 
-@StoreUtil.is('corruption')
+@TemplUtil.is('corruption')
 export class CorruptionModel extends IncidentModel<
     CorruptionProps.E,
     CorruptionProps.S,
     CorruptionProps.C,
-    CorruptionProps.P,
-    CorruptionProps.R
+    CorruptionProps.P
 > {
-    constructor(loader?: Loader<CorruptionModel>) {
-        super(() => {
-            const props = loader?.() ?? {};
-            return {
-                uuid: props.uuid,
-                state: {},
-                child: {},
-                refer: {},
-                route: {}
-            }
+    constructor(props?: CorruptionModel['props']) {
+        super({
+            uuid: props?.uuid,
+            state: {},
+            child: {},
+            refer: {},
         })
     }
 
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniplenty.decor)
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minitrue.decor)
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.miniluv.decor)
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.child.minipax.decor)
-    private onSalaryCheck(model: StaffModel, state: StaffDecor) {
-        state.draft.salary += 100;
-        state.draft.asset += 10000;
+
+    // salary
+    @StateUtil.on(self => self.onSalaryCompute)
+    public loadSalary() { return this.route.ingsoc?.proxy.child.miniplenty.decor }
+
+    @StateUtil.on(self => self.onSalaryCompute)
+    public loadSalary2() { return this.route.ingsoc?.proxy.child.minitrue.decor }
+
+    @StateUtil.on(self => self.onSalaryCompute)
+    public loadSalary3() { return this.route.ingsoc?.proxy.child.miniluv.decor }
+
+    @StateUtil.on(self => self.onSalaryCompute)
+    public loadSalary4() { return this.route.ingsoc?.proxy.child.minipax.decor }
+    
+    private onSalaryCompute(model: StaffModel, state: StaffDecor) {
+        state.current.salary += 100;
+        state.current.asset += 10000;
     }
 
-    @StateUtil.on((model) => model.route.ingsoc?.proxy.decor)
-    private onAssetCheck(model: IngSocModel, state: IngSocDecor) {
+    // asset
+    @StateUtil.on(self => self.onAssetCompute)
+    public loadAsset() {
+        return this.route.ingsoc?.proxy.decor
+    }
+
+    private onAssetCompute(model: IngSocModel, state: IngSocDecor) {
         state.draft.asset -= 40000;
     }
 }

@@ -1,52 +1,47 @@
 import { DemoModel } from "../demo";
-import { StaffModel, StaffProps } from "../staff";
-import { Method, Model, Props } from "set-piece";
+import { StaffModel } from "../staff";
+import { Model } from "set-piece";
 
-export namespace FeatureProps {
+export namespace FeatureModel {
     export type E = {};
     export type S = { isActive: boolean; };
     export type C = {};
     export type R = {};
-    export type P = { staff: StaffModel };
 }
 
 export abstract class FeatureModel<
-    E extends Partial<FeatureProps.E> & Props.E = {},
-    S extends Partial<FeatureProps.S> & Props.S = {},
-    C extends Partial<FeatureProps.C> & Props.C = {},
-    R extends Partial<FeatureProps.R> & Props.R = {},
-    P extends Partial<FeatureProps.P> & Props.P = {},
+    E extends Partial<FeatureModel.E> & Model.E = {},
+    S extends Partial<FeatureModel.S> & Model.S = {},
+    C extends Partial<FeatureModel.C> & Model.C = {},
+    R extends Partial<FeatureModel.R> & Model.R = {},
 > extends Model<
-    E & FeatureProps.E, 
-    S & FeatureProps.S, 
-    C & FeatureProps.C,
-    R & FeatureProps.R, 
-    P & FeatureProps.P
+    E & FeatureModel.E, 
+    S & FeatureModel.S, 
+    C & FeatureModel.C,
+    R & FeatureModel.R
 > {
-    constructor(loader: Method<FeatureModel['props'] & {
+    public get route() {
+        const route = super.route;
+        return {
+            ...route,
+            staff: route.list.find(item => item instanceof StaffModel)
+        }
+    }
+
+    constructor(props: FeatureModel['props'] & {
         uuid: string | undefined,
         state: S,
         child: C,
         refer: R,
-        route: P
-    }, []>) {
-        super(() => {
-            const props = loader();
-            return {
-                uuid: props.uuid,
-                state: { 
-                    isActive: true,
-                    ...props.state 
-                },
-                child: { 
-                    ...props.child,
-                },
-                refer: { ...props.refer },
-                route: {
-                    staff: StaffModel.prototype,
-                    ...props.route,
-                }
-            }
+    }) {
+        super({
+            uuid: props.uuid,
+            state: { 
+                isActive: true,
+                ...props.state 
+            },
+            child: { ...props.child },
+            refer: { ...props.refer },
         })
     }
 }

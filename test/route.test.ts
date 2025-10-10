@@ -10,7 +10,7 @@ describe('route', () => {
 
     const winston = obrien.child.subordinates[0];
     const julia = obrien.child.subordinates[1];
-    const syme = new StaffModel(() => ({
+    const syme = new StaffModel({
         state: {
             name: 'Syme',
             salary: 10,
@@ -18,7 +18,7 @@ describe('route', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    }))
+    })
     if (!winston || !julia) throw new Error();
 
 
@@ -30,9 +30,8 @@ describe('route', () => {
         expect(julia.route.parent).toBe(obrien);
     })
 
-
     test('remove', () => {
-        obrien.draft.child.subordinates.shift();
+        obrien.origin.child.subordinates.shift();
         expect(obrien.child.subordinates.length).toBe(1);
         expect(winston.route.parent).toBe(undefined);
         expect(julia.route.parent).toBe(obrien);
@@ -40,7 +39,7 @@ describe('route', () => {
 
 
     test('replace', () => {
-        obrien.draft.child.subordinates[0] = syme;
+        obrien.origin.child.subordinates[0] = syme;
         expect(syme.route.parent).toBe(obrien);
         expect(winston.route.parent).toBe(undefined);
         expect(julia.route.parent).toBe(undefined);
@@ -48,7 +47,7 @@ describe('route', () => {
 
 
     test('spawn', () => {
-        aaronson.draft.child.subordinates.push(winston);
+        aaronson.origin.child.subordinates.push(winston);
         expect(winston.route.parent).toBe(aaronson);
     })
 

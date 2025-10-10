@@ -1,13 +1,13 @@
 import { RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
-import { StaffModel, StaffProps } from "../src/staff";
 import { GenderType } from "../src/types";
+import { StaffModel } from "../src/staff";
 
 describe('event', () => {
     const ingsoc = new IngSocModel();
 
     const obrien = ingsoc.child.minitrue;
-    const goldstein = new StaffModel(() => ({
+    const goldstein = new StaffModel({
         state: {
             name: 'Emmanuel Goldstein',
             salary: 100,
@@ -15,7 +15,7 @@ describe('event', () => {
             value: 0,
             gender: GenderType.MALE,
         }
-    }))
+    })
 
 
     const winston = obrien.child.subordinates[0];
@@ -49,6 +49,7 @@ describe('event', () => {
 
     test('promote', () => {
         winston.promote();
+        console.log('promotion done')
         expect(winston.state.salary).toBe(20);
 
         winston.work();
@@ -88,15 +89,15 @@ describe('event', () => {
         expect(ingsoc.state.asset).toBe(assets);
     })
 
-    // test('corruption-off', () => {
-    //     ingsoc.corrupt(false);
-    //     assets += 40000;
-    //     expect(ingsoc.state.asset).toBe(assets);
-    //     expect(goldstein.state.asset).toBe(1200);
+    test('corruption-off', () => {
+        ingsoc.corrupt(false);
+        assets += 40000;
+        expect(ingsoc.state.asset).toBe(assets);
+        expect(goldstein.state.asset).toBe(1200);
 
-    //     goldstein.work();
-    //     assets -= 100;
-    //     expect(goldstein.state.asset).toBe(1300);
-    //     expect(ingsoc.state.asset).toBe(assets);
-    // })
+        goldstein.work();
+        assets -= 100;
+        expect(goldstein.state.asset).toBe(1300);
+        expect(ingsoc.state.asset).toBe(assets);
+    })
 })

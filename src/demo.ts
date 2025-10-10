@@ -1,14 +1,14 @@
-import { Decor, Event, Loader, Model, StateUtil } from "set-piece";
+import { Decor, Model, StateUtil } from "set-piece";
 import { EmotionType, GenderType } from "./types";
 import { DeepReadonly } from "utility-types";
 import { IngSocModel } from "./ing-soc";
 import { StaffModel } from "./staff";
 
-export namespace DemoProps {
+export namespace DemoModel {
     export type E = { 
-        onPlay: Event 
-        onHello: Event<{ target: DemoModel }>,
-        onCount: Event<{ value: number }>,
+        onPlay: {}
+        onHello: { target: DemoModel },
+        onCount: { value: number },
     };
     export type S = { 
         price: number,
@@ -35,51 +35,43 @@ export namespace DemoProps {
     }
 }
 
-export class DemoDecor extends Decor<DemoProps.S> {
+export class DemoDecor extends Decor<DemoModel.S> {
     public disable() {
-        this.detail.isAlive = false;
+        this.origin.isAlive = false;
     }
 }
 
-@StateUtil.use(DemoDecor)
 export class DemoModel extends Model<
-    DemoProps.E,
-    DemoProps.S,
-    DemoProps.C,
-    DemoProps.R,
-    DemoProps.P
+    DemoModel.E,
+    DemoModel.S,
+    DemoModel.C,
+    DemoModel.R
 > {
+    public get decor(): DemoDecor { return new DemoDecor(this) }
 
-    constructor(loader?: Loader<DemoModel>) {
-        super(() => {
-            const props = loader?.() ?? {};
-            return {
-                uuid: props.uuid,
-                state: {
-                    name: props.state?.name ?? '',
-                    price: props.state?.price ?? 0,
-                    emotion: props.state?.emotion ?? EmotionType.NEUTRAL,
-                    gender: props.state?.gender ?? GenderType.UNKNOWN,
-                    isAlive: props.state?.isAlive ?? true,
-                    tags: props.state?.tags ?? [],
-                    location: props.state?.location ?? { x: 0, y: 0 },
-                    ...props.state,
-                },
-                child: { 
-                    foo: props.child?.foo ?? new DemoModel(),
-                    bar: props.child?.bar ?? new DemoModel(),
-                    baz: props.child?.baz ?? [],
-                    ...props.child,
-                },
-                refer: {
-                    baz: props.refer?.baz ?? [],
-                    bar: props.refer?.bar,
-                    ...props.refer,
-                },
-                route: {
-                    ingSoc: IngSocModel.prototype,
-                    staff: StaffModel.prototype,
-                }
+    constructor(props?: DemoModel['props']) {
+        super({
+            uuid: props?.uuid,
+            state: {
+                name: props?.state?.name ?? '',
+                price: props?.state?.price ?? 0,
+                emotion: props?.state?.emotion ?? EmotionType.NEUTRAL,
+                gender: props?.state?.gender ?? GenderType.UNKNOWN,
+                isAlive: props?.state?.isAlive ?? true,
+                tags: props?.state?.tags ?? [],
+                location: props?.state?.location ?? { x: 0, y: 0 },
+                ...props?.state,
+            },
+            child: { 
+                foo: props?.child?.foo ?? new DemoModel(),
+                bar: props?.child?.bar ?? new DemoModel(),
+                baz: props?.child?.baz ?? [],
+                ...props?.child,
+            },
+            refer: {
+                baz: props?.refer?.baz ?? [],
+                bar: props?.refer?.bar,
+                ...props?.refer,
             }
         }) 
     }
@@ -98,43 +90,48 @@ export class DemoModel extends Model<
         // this.state.emotion = EmotionType.HAPPY;
 
         // this.draft.state.name = 'test';
-        this.draft.state.price += 100;
+        this.origin.state.price += 100;
         // this.draft.state.tags.push('test');
-        this.draft.state.tags = ['test'];
-        this.draft.state.location = { x: 100, y: 100 }
-        this.draft.state.emotion = EmotionType.HAPPY;
-        this.draft.state.gender = GenderType.MALE;
-        this.draft.state.isAlive = false;
-        this.draft.state.location = { x: 100, y: 100 }
+        this.origin.state.tags = ['test'];
+        this.origin.state.location = { x: 100, y: 100 }
+        this.origin.state.emotion = EmotionType.HAPPY;
+        this.origin.state.gender = GenderType.MALE;
+        this.origin.state.isAlive = false;
+        this.origin.state.location = { x: 100, y: 100 }
         
-        const foo: DemoModel = this.draft.child.foo;
-        const bar: DemoModel | undefined = this.draft.child.bar;
-        const baz: DemoModel[] = this.draft.child.baz;
+        const foo: DemoModel = this.origin.child.foo;
+        const bar: DemoModel | undefined = this.origin.child.bar;
+        const baz: DemoModel[] = this.origin.child.baz;
 
-        this.draft.child.foo = new DemoModel();
-        this.draft.child.bar = new DemoModel();
-        this.draft.child.baz = [new DemoModel()];
-        this.draft.child.baz.push(new DemoModel());
+        this.origin.child.foo = new DemoModel();
+        this.origin.child.bar = new DemoModel();
+        this.origin.child.baz = [new DemoModel()];
+        this.origin.child.baz.push(new DemoModel());
         
 
-        const foo_2: DemoModel | undefined = this.draft.refer.foo;
+        const foo_2: DemoModel | undefined = this.origin.refer.foo;
         // const foo_3: PetModel = this.draft.refer.foo;
-        const bar_2: DemoModel | undefined = this.draft.refer.bar;
-        const baz_2: DemoModel[] | undefined = this.draft.refer.baz;
+        const bar_2: DemoModel | undefined = this.origin.refer.bar;
+        const baz_2: DemoModel[] | undefined = this.origin.refer.baz;
 
-        this.draft.refer.foo = new DemoModel();
-        this.draft.refer.bar = new DemoModel();
-        this.draft.refer.baz = [new DemoModel()];
-        this.draft.refer.baz.push(new DemoModel());
+        this.origin.refer.foo = new DemoModel();
+        this.origin.refer.bar = new DemoModel();
+        this.origin.refer.baz = [new DemoModel()];
+        this.origin.refer.baz.push(new DemoModel());
 
-        this.event.onHello(new Event({ target: this }));
-        this.event.onHello(new Event({ target: new DemoModel() }));
-        this.event.onCount(new Event({ value: 100 }));
-        this.event.onPlay(new Event({}));
+        this.event.onHello({ target: this });
+        this.event.onHello({ target: new DemoModel() });
+        this.event.onCount({ value: 100 });
+        this.event.onPlay({});
+    }
+    
+    @StateUtil.on(self => self.onCompute)
+    private load() {
+        const self: DemoModel = this;
+        return self.proxy.decor
     }
 
-    @StateUtil.on(model => model.proxy.decor)
-    onCheck(model: DemoModel, state: DemoDecor) {
+    private onCompute(model: DemoModel, state: DemoDecor) {
         state.disable()
     }
 
