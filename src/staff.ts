@@ -29,12 +29,11 @@ export namespace StaffModel {
 }
 
 export class StaffDecor extends Decor<
-    StaffModel.S
+    StaffModel.S,
+    Pick<StaffModel.S, 'salary' | 'asset'>
 > {
-    public current: Pick<StaffModel.S, 'salary' | 'asset'>;
     constructor(model: StaffModel) {
         super(model);
-        this.current = this.origin;
     }
 }
 
@@ -85,6 +84,7 @@ export class StaffModel extends Model<
         if (this.origin.state.asset + value < 0) {
             value = -this.origin.state.asset;
         }
+        console.log('income', value)
         this.origin.state.asset += value;
         return value;
     }

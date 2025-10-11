@@ -37,7 +37,7 @@ export namespace DemoModel {
 
 export class DemoDecor extends Decor<DemoModel.S> {
     public disable() {
-        this.origin.isAlive = false;
+        this._origin.isAlive = false;
     }
 }
 

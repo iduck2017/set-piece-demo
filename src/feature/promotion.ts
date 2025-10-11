@@ -20,8 +20,8 @@ export class PromotionModel extends FeatureModel {
     }
 
     private onCompute(model: StaffModel, decor: StaffDecor) {
-        console.log('promotion onCompute', decor.current.salary)
-        decor.current.salary += 10;
-        console.log(decor.current.salary);
+        console.log('promotion onCompute', decor.origin.salary)
+        decor.origin.salary += 10;
+        console.log(decor.origin.salary);
     }
 }

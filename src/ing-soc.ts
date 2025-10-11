@@ -21,11 +21,12 @@ export namespace IngSocModel {
     export type R = {}
 }
 
-export class IngSocDecor extends Decor<IngSocModel.S> {
-    public draft: Pick<IngSocModel.S, 'asset'>;
+export class IngSocDecor extends Decor<
+    IngSocModel.S,
+    Pick<IngSocModel.S, 'asset'>
+> {
     constructor(model: IngSocModel) {
         super(model);
-        this.draft = this.origin;
     }
 }
 
@@ -141,14 +142,12 @@ export class IngSocModel extends Model<
     }
 
 
-    @EventUtil.on(self => self.onWork)
-    public load() {
+    @EventUtil.on(self => self.handleWork)
+    public listenWork() {
         return this.proxy.any(StaffModel).event?.onWork
     }
-    
-
     @DebugUtil.log()
-    private onWork(that: StaffModel, event: {}) {
+    private handleWork(that: StaffModel, event: {}) {
         const value = that.state.value - that.state.salary;
         const result = this.income(value);
         if (result > value) that.income(-result);

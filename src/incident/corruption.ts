@@ -43,8 +43,8 @@ export class CorruptionModel extends IncidentModel<
     public loadSalary4() { return this.route.ingsoc?.proxy.child.minipax.decor }
     
     private onSalaryCompute(model: StaffModel, state: StaffDecor) {
-        state.current.salary += 100;
-        state.current.asset += 10000;
+        state.origin.salary += 100;
+        state.origin.asset += 10000;
     }
 
     // asset
@@ -54,6 +54,6 @@ export class CorruptionModel extends IncidentModel<
     }
 
     private onAssetCompute(model: IngSocModel, state: IngSocDecor) {
-        state.draft.asset -= 40000;
+        state.origin.asset -= 40000;
     }
 }

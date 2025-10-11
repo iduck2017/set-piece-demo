@@ -31,6 +31,6 @@ export class DepressionModel extends IncidentModel<
     }
     
     private onCompute(model: StaffModel, state: StaffDecor) {
-        state.current.salary -= 10;
+        state.origin.salary -= 10;
     }
 }
