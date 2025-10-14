@@ -25,12 +25,12 @@ export class DepressionModel extends IncidentModel<
         })
     }
 
-    @StateUtil.on(self => self.onCompute)
-    private load() {
+    @StateUtil.on(self => self.modifySalary)
+    private listenSalary() {
         return this.route.ingsoc?.proxy.any(StaffModel).decor
     }
     
-    private onCompute(model: StaffModel, state: StaffDecor) {
+    private modifySalary(model: StaffModel, state: StaffDecor) {
         state.origin.salary -= 10;
     }
 }

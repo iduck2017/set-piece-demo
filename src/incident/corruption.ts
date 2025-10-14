@@ -30,30 +30,26 @@ export class CorruptionModel extends IncidentModel<
 
 
     // salary
-    @StateUtil.on(self => self.onSalaryCompute)
-    public loadSalary() { return this.route.ingsoc?.proxy.child.miniplenty.decor }
+    @StateUtil.on(self => self.modifySalary)
+    public listenSalary() { return this.route.ingsoc?.proxy.child.miniplenty.decor }
+    @StateUtil.on(self => self.modifySalary)
+    public listenSalary2() { return this.route.ingsoc?.proxy.child.minitrue.decor }
+    @StateUtil.on(self => self.modifySalary)
+    public listenSalary3() { return this.route.ingsoc?.proxy.child.miniluv.decor }
+    @StateUtil.on(self => self.modifySalary)
+    public listenSalary4() { return this.route.ingsoc?.proxy.child.minipax.decor }
 
-    @StateUtil.on(self => self.onSalaryCompute)
-    public loadSalary2() { return this.route.ingsoc?.proxy.child.minitrue.decor }
-
-    @StateUtil.on(self => self.onSalaryCompute)
-    public loadSalary3() { return this.route.ingsoc?.proxy.child.miniluv.decor }
-
-    @StateUtil.on(self => self.onSalaryCompute)
-    public loadSalary4() { return this.route.ingsoc?.proxy.child.minipax.decor }
-    
-    private onSalaryCompute(model: StaffModel, state: StaffDecor) {
+    private modifySalary(model: StaffModel, state: StaffDecor) {
         state.origin.salary += 100;
         state.origin.asset += 10000;
     }
 
     // asset
-    @StateUtil.on(self => self.onAssetCompute)
-    public loadAsset() {
+    @StateUtil.on(self => self.modifyAsset)
+    public listenAsset() {
         return this.route.ingsoc?.proxy.decor
     }
-
-    private onAssetCompute(model: IngSocModel, state: IngSocDecor) {
+    private modifyAsset(model: IngSocModel, state: IngSocDecor) {
         state.origin.asset -= 40000;
     }
 }

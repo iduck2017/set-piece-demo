@@ -1,6 +1,7 @@
 import { GenderType } from "../src/types";
 import { IngSocModel } from "../src/ing-soc";
 import { StaffModel } from "../src/staff";
+import { DebugUtil } from "set-piece";
 
 describe('decor', () => {
     const ingsoc = new IngSocModel();

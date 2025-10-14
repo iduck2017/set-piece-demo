@@ -1,4 +1,4 @@
-import { RouteUtil } from "set-piece";
+import { DebugUtil, RouteUtil } from "set-piece";
 import { IngSocModel } from "../src/ing-soc"
 import { GenderType } from "../src/types";
 import { StaffModel } from "../src/staff";
@@ -59,7 +59,7 @@ describe('event', () => {
     })
 
     test('corruption', () => {
-        
+        console.log('corruption')
         ingsoc.corrupt(true);
         assets -= 40000;
         expect(ingsoc.state.asset).toBe(assets);

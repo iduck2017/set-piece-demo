@@ -125,13 +125,13 @@ export class DemoModel extends Model<
         this.event.onPlay({});
     }
     
-    @StateUtil.on(self => self.onCompute)
-    private load() {
+    @StateUtil.on(self => self.modifySelf)
+    private listenSelf() {
         const self: DemoModel = this;
         return self.proxy.decor
     }
 
-    private onCompute(model: DemoModel, state: DemoDecor) {
+    private modifySelf(model: DemoModel, state: DemoDecor) {
         state.disable()
     }
 

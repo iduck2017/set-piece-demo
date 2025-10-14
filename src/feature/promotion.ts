@@ -14,12 +14,12 @@ export class PromotionModel extends FeatureModel {
         })
     }
 
-    @StateUtil.on(self => self.onCompute)
-    private load() {
+    @StateUtil.on(self => self.modifySalary)
+    private listenSalary() {
         return this.route.staff?.proxy.decor
     }
 
-    private onCompute(model: StaffModel, decor: StaffDecor) {
+    private modifySalary(model: StaffModel, decor: StaffDecor) {
         console.log('promotion onCompute', decor.origin.salary)
         decor.origin.salary += 10;
         console.log(decor.origin.salary);

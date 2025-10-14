@@ -41,7 +41,6 @@ export class IngSocModel extends Model<
 > {
     public get decor(): IngSocDecor { return new IngSocDecor(this) }
 
-
     constructor(props?: IngSocModel['props']) {
         const winston = new StaffModel({
             state: {
