@@ -23,7 +23,7 @@ export abstract class IncidentModel<
         const route = super.route;
         return {
             ...route,
-            ingsoc: route.list.find(item => item instanceof IngSocModel)
+            ingsoc: route.items.find(item => item instanceof IngSocModel)
         }
     }
 

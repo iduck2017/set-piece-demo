@@ -118,7 +118,7 @@ export class IngSocModel extends Model<
         })
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public income(value: number): number {
         if (this.origin.state.asset + value < 0) {
             value = -this.origin.state.asset;
@@ -128,7 +128,7 @@ export class IngSocModel extends Model<
     }
 
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public purge(next: StaffModel, prev: StaffModel) {
         if (this.origin.child.miniluv === prev) this.origin.child.miniluv = next;
         if (this.origin.child.minitrue === prev)  this.origin.child.minitrue = next;
@@ -145,7 +145,7 @@ export class IngSocModel extends Model<
     public listenWork() {
         return this.proxy.any(StaffModel).event?.onWork
     }
-    @DebugUtil.log()
+    @DebugUtil.span()
     private handleWork(that: StaffModel, event: {}) {
         const value = that.state.value - that.state.salary;
         const result = this.income(value);
@@ -153,7 +153,7 @@ export class IngSocModel extends Model<
         else that.income(that.state.salary);
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public depress(flag: boolean) {
         const incidents = this.origin.child.incidents;
         let index = incidents.findIndex(item => item instanceof DepressionModel);
@@ -166,7 +166,7 @@ export class IngSocModel extends Model<
         }
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public corrupt(flag: boolean) {
         const incidents = this.origin.child.incidents;
         let index = incidents.findIndex(item => item instanceof CorruptionModel);

@@ -24,7 +24,7 @@ export abstract class FeatureModel<
         const route = super.route;
         return {
             ...route,
-            staff: route.list.find(item => item instanceof StaffModel)
+            staff: route.items.find(item => item instanceof StaffModel)
         }
     }
 

@@ -74,12 +74,12 @@ export class StaffModel extends Model<
         return this.state.name;
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public work() {
         this.event.onWork({});
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public income(value: number): number {
         if (this.origin.state.asset + value < 0) {
             value = -this.origin.state.asset;
@@ -90,14 +90,14 @@ export class StaffModel extends Model<
     }
 
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public promote() {
         const promotion = new PromotionModel({});
         this.origin.child.features.push(promotion);
     }
 
     
-    @DebugUtil.log()
+    @DebugUtil.span()
     public demote() {
         const features = this.origin.child.features;
         const index = features.findIndex((item) => item instanceof PromotionModel);
@@ -105,14 +105,14 @@ export class StaffModel extends Model<
         features.splice(index, 1);
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     @TranxUtil.span()
     public hello(staff: StaffModel) {
         this.origin.refer.friends?.push(staff);
         return [...this.origin.refer.friends ?? []]
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public remove(staff: StaffModel) {
         const index = this.child.subordinates.indexOf(staff);
         if (index === -1) return undefined;

@@ -15,7 +15,7 @@ export class AppService {
 
     private constructor() {}
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public static boot() {
         const ingsoc = new IngSocModel();
         const obrien = ingsoc.child.minitrue;
@@ -30,7 +30,7 @@ export class AppService {
         createRoot(AppService._rootView).render(<h1>Hello World</h1>);
     }
 
-    @DebugUtil.log()
+    @DebugUtil.span()
     public static test() {
         const ingsoc = AppService._rootModel;
         if (!ingsoc) return;
